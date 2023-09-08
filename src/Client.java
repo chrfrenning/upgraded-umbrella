@@ -5,12 +5,20 @@ import java.rmi.registry.Registry;
 public class Client {
     public static void main(String[] args) {
         try {
+            // Check that we have correct arguments
+            if (args.length != 1) {
+                System.out.println("Usage: java Client <zone>");
+                return;
+            }
+            // Get zone from command line arguments
+            String zone = args[0];
+
             // Connect to the RMI registry on localhost, port 1099
             Registry registry = LocateRegistry.getRegistry("localhost", 1099);
 
             // Connect to the load balancer and get a server to talk to
             LoadBalancerService loadBalancer = (LoadBalancerService) registry.lookup("LoadBalancer");
-            String serverName = loadBalancer.getStatisticsServer("USA");
+            String serverName = loadBalancer.getStatisticsServer(zone);
             
             // Connect to the given statistics server
 
