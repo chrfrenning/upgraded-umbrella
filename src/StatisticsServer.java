@@ -31,6 +31,11 @@ public class StatisticsServer extends UnicastRemoteObject implements StatisticsS
         return new QueryResult(0, 0, 0, serverName); // Placeholder
     }
 
+    public int getQueueLength() throws RemoteException {
+        // Implement your code to return the queue length
+        return 0; // Placeholder
+    }
+
     public static void main(String[] args) {
         try {
             // Expect servername as argument

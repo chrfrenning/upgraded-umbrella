@@ -6,4 +6,5 @@ public interface StatisticsService extends Remote {
     QueryResult getNumberOfCities(String countryName, int min) throws RemoteException;
     QueryResult getNumberOfCountries(int cityCount, int minPopulation) throws RemoteException;
     QueryResult getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation) throws RemoteException;
+    int getQueueLength() throws RemoteException;
 }
