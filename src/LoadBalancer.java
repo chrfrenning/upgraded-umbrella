@@ -11,7 +11,7 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
     }
 
     @Override
-    public String choseServer(String clientZone) throws RemoteException {
+    public String chooseServer(String clientZone) throws RemoteException {
         // Query the RMI service to list all services that start with "StatisticsService:"
         // Iterate through the list of services and find the one with the least load
         Registry registry = LocateRegistry.getRegistry("localhost", 1099);

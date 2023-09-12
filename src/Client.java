@@ -18,7 +18,7 @@ public class Client {
 
             // Connect to the load balancer and get a server to talk to
             Proxy loadBalancer = (Proxy) registry.lookup("LoadBalancer");
-            String serverName = loadBalancer.choseServer(zone);
+            String serverName = loadBalancer.chooseServer(zone);
             
             // Connect to the given statistics server
 
