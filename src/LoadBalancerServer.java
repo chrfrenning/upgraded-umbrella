@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public class LoadBalancerServer extends UnicastRemoteObject implements LoadBalancerService {
+public class LoadBalancerServer extends UnicastRemoteObject implements Proxy {
 
     protected LoadBalancerServer() throws RemoteException {
         super();
@@ -15,7 +15,7 @@ public class LoadBalancerServer extends UnicastRemoteObject implements LoadBalan
         // Query the RMI service to list all services that start with "StatisticsService:"
         // Iterate through the list of services and find the one with the least load
         Registry registry = LocateRegistry.getRegistry("localhost", 1099);
-        ArrayList<String> serverList = new ArrayList<String>();
+        ArrayList<String> serverList = new ArrayList<>();
         for (String name : registry.list()) {
             System.out.println(name);
             if (name.startsWith("StatisticsService:")) {
@@ -32,9 +32,9 @@ public class LoadBalancerServer extends UnicastRemoteObject implements LoadBalan
             // The load balancer owns the registry
             // alas should be started as the first component
             Registry registry = LocateRegistry.createRegistry(1099);
-            // Host the service
-            LoadBalancerService service = new LoadBalancerServer();
-            registry.bind("LoadBalancer", service); // Bind the remote object to the registry
+            // Host the proxy
+            Proxy proxy = new LoadBalancerServer();
+            registry.bind("LoadBalancer", proxy); // Bind the remote object to the registry
             System.out.println("LoadBalancer is ready.");
         } catch (Exception e) {
             System.err.println("LoadBalancer exception:");

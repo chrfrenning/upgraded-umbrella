@@ -17,7 +17,7 @@ public class Client {
             Registry registry = LocateRegistry.getRegistry("localhost", 1099);
 
             // Connect to the load balancer and get a server to talk to
-            LoadBalancerService loadBalancer = (LoadBalancerService) registry.lookup("LoadBalancer");
+            Proxy loadBalancer = (Proxy) registry.lookup("LoadBalancer");
             String serverName = loadBalancer.getStatisticsServer(zone);
             
             // Connect to the given statistics server
