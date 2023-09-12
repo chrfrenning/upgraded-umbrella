@@ -4,31 +4,31 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 public class StatisticsServer extends UnicastRemoteObject implements StatisticsService {
-    private String serverName;
+    private final String serverName;
 
     protected StatisticsServer(String serverName) throws RemoteException {
         super();
         this.serverName = serverName;
     }
 
-    public QueryResult getPopulationOfCountry(String countryName) throws RemoteException {
-        // Implement your code to return QueryResult
-        return new QueryResult(0, 0, 0, serverName); // Placeholder
+    public Result getPopulationOfCountry(String countryName) throws RemoteException {
+        // Implement your code to return Result
+        return new Result(0, 0, 0, serverName); // Placeholder
     }
 
-    public QueryResult getNumberOfCities(String countryName, int min) throws RemoteException {
-        // Implement your code to return QueryResult
-        return new QueryResult(0, 0, 0, serverName); // Placeholder
+    public Result getNumberOfCities(String countryName, int min) throws RemoteException {
+        // Implement your code to return Result
+        return new Result(0, 0, 0, serverName); // Placeholder
     }
 
-    public QueryResult getNumberOfCountries(int cityCount, int minPopulation) throws RemoteException {
-        // Implement your code to return QueryResult
-        return new QueryResult(0, 0, 0, serverName); // Placeholder
+    public Result getNumberOfCountries(int cityCount, int minPopulation) throws RemoteException {
+        // Implement your code to return Result
+        return new Result(0, 0, 0, serverName); // Placeholder
     }
 
-    public QueryResult getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation) throws RemoteException {
-        // Implement your code to return QueryResult
-        return new QueryResult(0, 0, 0, serverName); // Placeholder
+    public Result getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation) throws RemoteException {
+        // Implement your code to return Result
+        return new Result(0, 0, 0, serverName); // Placeholder
     }
 
     public int getQueueLength() throws RemoteException {
@@ -49,7 +49,7 @@ public class StatisticsServer extends UnicastRemoteObject implements StatisticsS
             // Create and register the statistics service
             StatisticsService service = new StatisticsServer(serverName);
             registry.bind(String.format("StatisticsService:%s", serverName), service); // Bind the remote object to the registry
-            System.out.println(String.format("StatisticsService:%s is ready.", serverName));
+            System.out.printf("StatisticsService:%s is ready.%n", serverName);
         } catch (Exception e) {
             System.err.println("StatisticsService exception:");
             e.printStackTrace();

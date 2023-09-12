@@ -1,12 +1,12 @@
 import java.io.Serializable;
 
-public class QueryResult implements Serializable {
-    private int result;
-    private int waitingTime;
-    private int executionTime;
-    private String serverName;
+public class Result implements Serializable {
+    private final int result;
+    private final int waitingTime;
+    private final int executionTime;
+    private final String serverName;
 
-    public QueryResult(int result, int waitingTime, int executionTime, String serverName) {
+    public Result(int result, int waitingTime, int executionTime, String serverName) {
         this.result = result;
         this.waitingTime = waitingTime;
         this.executionTime = executionTime;
