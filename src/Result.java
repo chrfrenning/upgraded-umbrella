@@ -17,7 +17,7 @@ public class Result implements Serializable {
 
     @Override
     public String toString() {
-        return "Result{'" + serviceName + '\'' +
+        return "Result{" + serviceName +
                 ", result=" + result +
                 ", waitingTime=" + waitingTime +
                 ", executionTime=" + executionTime +
