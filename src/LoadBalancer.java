@@ -18,7 +18,7 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
         ArrayList<String> serverList = new ArrayList<>();
         for (String name : registry.list()) {
             System.out.println(name);
-            if (name.startsWith("StatisticsService:")) {
+            if (name.startsWith(clientZone)) {
                 serverList.add(name);
                 System.out.println("Added " + name);
             }

@@ -9,28 +9,34 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     protected Server(String serverName) throws RemoteException {
         super();
         this.serverName = serverName;
+        System.out.printf("Server in zone %s is created.%n", serverName);
     }
 
+    @Override
     public Result getPopulationOfCountry(String countryName) throws RemoteException {
         // Implement your code to return Result
         return new Result(0, 0, 0, serverName); // Placeholder
     }
 
+    @Override
     public Result getNumberOfCities(String countryName, int min) throws RemoteException {
         // Implement your code to return Result
         return new Result(0, 0, 0, serverName); // Placeholder
     }
 
+    @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation) throws RemoteException {
         // Implement your code to return Result
         return new Result(0, 0, 0, serverName); // Placeholder
     }
 
+    @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation) throws RemoteException {
         // Implement your code to return Result
         return new Result(0, 0, 0, serverName); // Placeholder
     }
 
+    @Override
     public int getQueueLength() throws RemoteException {
         // Implement your code to return the queue length
         return 0; // Placeholder
