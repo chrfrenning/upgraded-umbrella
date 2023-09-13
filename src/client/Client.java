@@ -2,7 +2,6 @@ package client;
 
 import server.Proxy;
 import server.StatisticsService;
-
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.util.logging.Logger;
@@ -21,11 +20,11 @@ public class Client {
             // Get the client zone number from command line arguments
             int zone = Integer.parseInt(args[0]);
             LOGGER.info("Requesting proxy for zone " + zone + " on PORT " + PORT + "...");
-            Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", PORT).lookup("server.LoadBalancer");
+            Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", PORT).lookup("loadBalancer");
             String serverName = loadBalancer.chooseServer(zone);
             
             LOGGER.info("Requesting service...");
-            StatisticsService service = (StatisticsService) Naming.lookup(String.format("rmi://localhost:1099/%s", serverName));
+            StatisticsService service = (StatisticsService) Naming.lookup(String.format("rmi://localhost:%d/%s", PORT, serverName));
 
             LOGGER.info("Querying service...");
             LOGGER.info(service.getPopulationOfCountry("USA").toString());

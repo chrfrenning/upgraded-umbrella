@@ -6,7 +6,6 @@ import java.util.logging.*;
 
 public class NetworkSimulator {
     private static final Logger LOGGER = Logger.getLogger(NetworkSimulator.class.getName());
-
     private static final int AMOUNT_OF_ZONES = 5;
     private static final int PORT = 1099;
 
@@ -19,8 +18,8 @@ public class NetworkSimulator {
             // Create a registry
             Registry registry = LocateRegistry.createRegistry(PORT);
             // Bind the load balancer to the registry
-            registry.bind("server.LoadBalancer", new LoadBalancer());
-            LOGGER.info(String.format("server.LoadBalancer is running on port %d.", PORT));
+            registry.bind("loadBalancer", new LoadBalancer());
+            LOGGER.info(String.format("loadBalancer is running on port %d.", PORT));
             // Bind remote objects to the registry
             for (int zone = 1; zone <= AMOUNT_OF_ZONES; zone++) {
                 registry.bind(String.valueOf(zone), new Server(zone));
