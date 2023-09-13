@@ -1,6 +1,5 @@
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
 public class Client {
     public static void main(String[] args) {
@@ -10,14 +9,12 @@ public class Client {
                 System.out.println("Usage: java Client <zone>");
                 return;
             }
-            // Get zone from command line arguments
-            String zone = args[0];
+            // Get the client zone number from command line arguments
+            int zone = Integer.parseInt(args[0]);
 
             // Connect to the RMI registry on localhost, port 1099
-            Registry registry = LocateRegistry.getRegistry("localhost", 1099);
-
             // Connect to the load balancer and get a server to talk to
-            Proxy loadBalancer = (Proxy) registry.lookup("LoadBalancer");
+            Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", 1099).lookup("LoadBalancer");
             String serverName = loadBalancer.chooseServer(zone);
             
             // Connect to the given statistics server
@@ -27,19 +24,19 @@ public class Client {
             // Call the remote methods and print the results
             Result populationResult = service.getPopulationOfCountry("USA");
             System.out.println("Population of USA: " + populationResult.getResult());
-            System.out.println("Server name: " + populationResult.getServerName());
+            System.out.println("Server name: " + populationResult.getZone());
 
             Result cityCountResult = service.getNumberOfCities("USA", 100000);
             System.out.println("Number of cities in USA with population > 100000: " + cityCountResult.getResult());
-            System.out.println("Server name: " + cityCountResult.getServerName());
+            System.out.println("Server name: " + cityCountResult.getZone());
 
             Result countryCountResult1 = service.getNumberOfCountries(10, 1000000);
             System.out.println("Number of countries with at least 10 cities and population > 1000000: " + countryCountResult1.getResult());
-            System.out.println("Server name: " + countryCountResult1.getServerName());
+            System.out.println("Server name: " + countryCountResult1.getZone());
 
             Result countryCountResult2 = service.getNumberOfCountries(10, 1000000, 5000000);
             System.out.println("Number of countries with at least 10 cities and population between 1000000 and 5000000: " + countryCountResult2.getResult());
-            System.out.println("Server name: " + countryCountResult2.getServerName());
+            System.out.println("Server name: " + countryCountResult2.getZone());
             
         } catch (Exception e) {
             System.err.println("Client exception:");

@@ -17,9 +17,9 @@ public class NetworkSimulator {
             registry.bind("LoadBalancer", new LoadBalancer());
             System.out.println("LoadBalancer is ready.");
             // Bind remote objects to the registry
-            for (int i = 1; i <= AMOUNT_OF_ZONES; i++) {
-                registry.bind(String.valueOf(i), new Server(String.valueOf(i)));
-                System.out.printf("Server in zone %d is ready.%n", i);
+            for (int zone = 1; zone <= AMOUNT_OF_ZONES; zone++) {
+                registry.bind(String.valueOf(zone), new Server(zone));
+                System.out.printf("Server in zone %d is registered.%n", zone);
             }
         } catch (Exception e) {
             System.err.println("Cannot register load balancer or servers.");

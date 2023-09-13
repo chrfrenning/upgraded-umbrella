@@ -4,13 +4,13 @@ public class Result implements Serializable {
     private final int result;
     private final int waitingTime;
     private final int executionTime;
-    private final String serverName;
+    private final int zone;
 
-    public Result(int result, int waitingTime, int executionTime, String serverName) {
+    public Result(int result, int waitingTime, int executionTime, int zone) {
         this.result = result;
         this.waitingTime = waitingTime;
         this.executionTime = executionTime;
-        this.serverName = serverName;
+        this.zone = zone;
     }
 
     // Getters and setters for each field
@@ -26,7 +26,7 @@ public class Result implements Serializable {
         return executionTime;
     }
 
-    public String getServerName() {
-        return serverName;
+    public int getZone() {
+        return zone;
     }
 }

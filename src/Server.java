@@ -3,12 +3,12 @@ import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
 
 public class Server extends UnicastRemoteObject implements StatisticsService {
-    private final String zone;
+    private final int zone;
 
-    protected Server(String zone) throws RemoteException {
+    protected Server(int zone) throws RemoteException {
         super();
         this.zone = zone;
-        System.out.printf("Server in zone %s is created.%n", zone);
+        System.out.printf("Server in zone %d is created.%n", zone);
     }
 
     @Override
@@ -41,18 +41,22 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
         return 0; // Placeholder
     }
 
+    /** Initiates a service in a zone and binds to the registry in a given port.
+     *
+     * @param args A unique zone number as the first argument
+     */
     public static void main(String[] args) {
         try {
-            // Expect servername as the first argument
             if (args.length != 1) {
-                System.out.println("Usage: java Server <servername>");
+                System.out.println("Usage: java Server <zone number>");
                 System.exit(0);
             }
+            int zone = Integer.parseInt(args[0]);
             // Get the registry on the PORT and bind a server instance to the registry
-            LocateRegistry.getRegistry(1099).bind("55", new Server("55")); // Bind the remote object to the registry
-            System.out.printf("Server in zone %s is ready.%n", "55");
+            LocateRegistry.getRegistry(1099).bind(String.valueOf(zone), new Server(zone));
+            System.out.printf("Server in zone %d is registered.%n", zone);
         } catch (Exception e) {
-            System.err.println("StatisticsService exception:");
+            System.err.println("Failed to create or register a server to the registry: ");
             e.printStackTrace();
         }
     }
