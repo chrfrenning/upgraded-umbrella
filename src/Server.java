@@ -16,26 +16,27 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
 
     @Override
     public Result getPopulationOfCountry(String countryName) throws RemoteException {
+        LOGGER.info("Processing... getPopulationOfCountry " + countryName);
         // Implement your code to return Result
-        return new Result(0, 0, 0, zone); // Placeholder
+        return new Result("getPopulationOfCountry", 0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public Result getNumberOfCities(String countryName, int min) throws RemoteException {
         // Implement your code to return Result
-        return new Result(0, 0, 0, zone); // Placeholder
+        return new Result("getNumberOfCities", 0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation) throws RemoteException {
         // Implement your code to return Result
-        return new Result(0, 0, 0, zone); // Placeholder
+        return new Result("getNumberOfCountries", 0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation) throws RemoteException {
         // Implement your code to return Result
-        return new Result(0, 0, 0, zone); // Placeholder
+        return new Result("getNumberOfCountries", 0, 0, 0, zone); // Placeholder
     }
 
     @Override

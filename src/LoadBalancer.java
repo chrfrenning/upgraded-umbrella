@@ -3,8 +3,10 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.logging.Logger;
 
 public class LoadBalancer extends UnicastRemoteObject implements Proxy {
+    private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
     protected LoadBalancer() throws RemoteException {
         super();
@@ -17,10 +19,10 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
         Registry registry = LocateRegistry.getRegistry("localhost", 1099);
         ArrayList<String> serverList = new ArrayList<>();
         for (String zone : registry.list()) {
-            System.out.println(zone);
+            LOGGER.info("Considering zone " + zone);
             if (zone.startsWith(String.valueOf(clientZone))) {
                 serverList.add(zone);
-                System.out.println("Added " + zone);
+                LOGGER.info("Chosen zone " + zone);
             }
         }
 
