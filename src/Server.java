@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 public class Server extends UnicastRemoteObject implements StatisticsService {
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
+    private static final int PORT = 1099;
 
     private final int zone;
 
@@ -16,33 +17,32 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
 
     @Override
     public Result getPopulationOfCountry(String countryName) throws RemoteException {
-        LOGGER.info("Processing... getPopulationOfCountry " + countryName);
-        // Implement your code to return Result
+        // TODO
         return new Result("getPopulationOfCountry", 0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public Result getNumberOfCities(String countryName, int min) throws RemoteException {
-        // Implement your code to return Result
+        // TODO
         return new Result("getNumberOfCities", 0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation) throws RemoteException {
-        // Implement your code to return Result
+        // TODO
         return new Result("getNumberOfCountries", 0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation) throws RemoteException {
-        // Implement your code to return Result
+        // TODO
         return new Result("getNumberOfCountries", 0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public int getQueueLength() throws RemoteException {
-        // Implement your code to return the queue length
-        return 0; // Placeholder
+        // TODO
+        return 0;
     }
 
     /** Initiates a service in a zone and binds to the registry in a given port.
@@ -57,7 +57,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
             }
             int zone = Integer.parseInt(args[0]);
             // Get the registry on the PORT and bind a server instance to the registry
-            LocateRegistry.getRegistry(1099).bind(String.valueOf(zone), new Server(zone));
+            LocateRegistry.getRegistry(PORT).bind(String.valueOf(zone), new Server(zone));
             LOGGER.info(String.format("Server in zone %d is registered.%n", zone));
         } catch (Exception e) {
             LOGGER.severe("Failed to create or register a server to the registry.");

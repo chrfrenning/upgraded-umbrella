@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 public class Client {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
+    private static final int PORT = 1099;
 
     public static void main(String[] args) {
         try {
@@ -18,7 +19,7 @@ public class Client {
             LOGGER.info("Requesting proxy...");
             // Connect to the RMI registry on localhost, port 1099
             // Connect to the load balancer and get a server to talk to
-            Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", 1099).lookup("LoadBalancer");
+            Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", PORT).lookup("LoadBalancer");
             String serverName = loadBalancer.chooseServer(zone);
             
             // Connect to the given statistics server
