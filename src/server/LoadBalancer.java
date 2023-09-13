@@ -1,3 +1,5 @@
+package server;
+
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
@@ -13,7 +15,7 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
 
     @Override
     public String chooseServer(int clientZone) throws RemoteException {
-        // Query the RMI service to list all services that start with "StatisticsService:"
+        // Query the RMI service to list all services that start with "server.StatisticsService:"
         // Iterate through the list of services and find the one with the least load
         for (String zone : LocateRegistry.getRegistry("localhost", PORT).list()) {
             LOGGER.info("Considering zone " + zone);

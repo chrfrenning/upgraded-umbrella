@@ -1,3 +1,8 @@
+package client;
+
+import server.Proxy;
+import server.StatisticsService;
+
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.util.logging.Logger;
@@ -10,16 +15,16 @@ public class Client {
         try {
             // Check that we have correct arguments
             if (args.length != 1) {
-                System.out.println("Usage: java Client <zone>");
+                System.out.println("Usage: java client.Client <zone>");
                 return;
             }
             // Get the client zone number from command line arguments
             int zone = Integer.parseInt(args[0]);
 
-            LOGGER.info("Requesting proxy...");
+            LOGGER.info("Requesting proxy for zone..." + zone);
             // Connect to the RMI registry on localhost, port 1099
             // Connect to the load balancer and get a server to talk to
-            Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", PORT).lookup("LoadBalancer");
+            Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", PORT).lookup("server.LoadBalancer");
             String serverName = loadBalancer.chooseServer(zone);
             
             // Connect to the given statistics server

@@ -13,7 +13,7 @@ IN5020 Autumn 2023 Group G7
 
 # Scope
 The system consists of a distributed International Statistics Service. The Application
-functionality is provided by a remote object residing at the server side. Client objects interact
+functionality is provided by a remote object residing at the server side. client.Client objects interact
 with the server through remote method invocations. The client can invoke the methods defined
 in the server’s remote interface specification.
 The system consists of a load balancing server, and 5 other servers that have access to
@@ -39,7 +39,7 @@ statistics information about different countries. The clients, using remote invo
 the query server for different information it requires.
 
 # Technical features
-## 1. Proxy (load balancing) Server
+## 1. server.Proxy (load balancing) server.Server
 The proxy server distributes the requests based on the zone that each client is located
 in. To simulate geographical zones in our assignment, each query will be assigned a zone
 number. We will discuss the format of queries in the next subsection.
@@ -58,18 +58,18 @@ geographical zones are connected as neighbors.
 
 figure
 
-Figure 1 shows a client in zone 1 that asks for a connection from the proxy server. Proxy
+Figure 1 shows a client in zone 1 that asks for a connection from the proxy server. server.Proxy
 server will first check the server in the same zone and if it not overloaded (less than 18 requests
 in the waiting list), it will return to the client the address and port to the server in the same zone
 so that the client can send the request to the server and get the response (Scenario A as indexed
 by 3.A and 4.A) in the figure. On the other hand, if the server in the same zone is overloaded, the proxy server will check the two neighbors of that zone (Zones 2 & 3 as per our scenario
 and visualized in Figure 1) and return the address of nearest server that is not overloaded (or
 the server at same zone if both neighbor servers are also overloaded). In the visualized scenario
-in Figure 1 (Scenario B and indexed by 3.B & 4.B), Server in zone 3 was assigned to the client
+in Figure 1 (Scenario B and indexed by 3.B & 4.B), server.Server in zone 3 was assigned to the client
 in Zone 1 since servers in both zone 1 and zone 2 are overloaded. (For server in zone 4, the
 next servers are server 5 and server 1)
 You can decide on the design of the remote interface of the proxy server for both clients
-and servers on different zones. Proxy needs to provide a remote interface for clients so that
+and servers on different zones. server.Proxy needs to provide a remote interface for clients so that
 clients can invoke its methods. Additionally, proxy needs access to servers’ remote interface
 to fetch information about servers’ load and waiting channel every once in a while. After every
 18 requests that the proxy assigns to a specific server (18 replies to clients with the same server
@@ -86,7 +86,7 @@ communication to servers in a neighbor zone will take 170 milliseconds (addition
 milliseconds). More details on how to simulate the communication time will be presented in
 the next subsection.
 
-## 2 Server
+## 2 server.Server
 1. The service interface exposes the following methods that have to be implemented by a
 servant class
 
@@ -149,7 +149,7 @@ i. In other words, each server will have 2 threads. One for executing the
 tasks on top of the waiting list and one to accept new tasks from the
 client.
 
-## 3 Client
+## 3 client.Client
 
 1. The client code will parse an input file containing a sequence of queries. Each line
 specifies a method name and an argument that should be invoked on the remote server.
@@ -160,26 +160,26 @@ be printed to a file.
 2. Input file format: <method name> <arg1> <arg2> <arg3> <zone:#>
 a. The method name describes one of the 4 interfaces that server provides.
 Depending on the method, it can take upto 3 arguments as input. The Zone:#
-describes the Zone of the Server to which the request must sent to.
+describes the Zone of the server.Server to which the request must sent to.
 b. eg:- getPopulationofCountry United States Zone:1
 c. eg:- getNumberofCities Norway 568422 Zone:4
 d. eg:- getNumberofCountries 3 1616894 Zone:5
 e. eg:- getNumberofCountries 6 1677496 4406235 Zone:4
 
 3. Output file format : <result> <input query> (turnaround time: YY ms, execution time:
-ZZ ms, waiting time: TT ms, processed by Server <server#>)
+ZZ ms, waiting time: TT ms, processed by server.Server <server#>)
 a. The result describes the result of the method invocation. The input query is the
 input query string (except the zone information). The third tuple describes the 
 turnaround time, execution time and waiting time details along with the server
 information. (described in the next section)
 b. eg:- : 9362428 getPopulationofCountry Sweden (turnaround time: 120 ms,
-execution time: 10 ms, waiting time: 100 ms, processed by Server 1)
+execution time: 10 ms, waiting time: 100 ms, processed by server.Server 1)
 c. eg:- 1 getNumberofCities Norway 568422 (turnaround time: 150 ms, execution
-time: 10 ms, waiting time: 120 ms, processed by Server 4)
+time: 10 ms, waiting time: 120 ms, processed by server.Server 4)
 d. eg:- 17 getNumberofCountries 3 1616894 (turnaround time: 100 ms, execution
-time: 10 ms, waiting time: 80 ms, processed by Server 5)
+time: 10 ms, waiting time: 80 ms, processed by server.Server 5)
 e. eg:- 2 getNumberofCountries 6 1677496 4406235 (turnaround time: 120 ms,
-execution time: 10 ms, waiting time: 90 ms, processed by Server 4)
+execution time: 10 ms, waiting time: 90 ms, processed by server.Server 4)
 
 4. At the end of the output file, add 4 entries. Each entry should correspond to a type of
 method that server handled. Each entry should report the average turn around time,
@@ -189,9 +189,9 @@ time: <Z> ms
 
 5. Implementation tip: Define a data structure (e.g. a java class) to implement the tasks
 and to store all the information associated with them.
-6. Note: The Client represents a simulator for set of clients. In real-world scenarios, there
+6. Note: The client.Client represents a simulator for set of clients. In real-world scenarios, there
 will be tens of thousands of clients that will send request to the servers. But we use a
-single Client to represent all the clients.
+single client.Client to represent all the clients.
 
 ## Summary of measurements:
 
@@ -210,7 +210,7 @@ to read the complete dataset to answer the client’s query.
 • The client should name the output file as naive_server.txt. Each entry in the output
 file should correspond to a query from the input file
 
-## 2 Server-Side Caching
+## 2 server.Server-Side Caching
 • Each server maintains a cache. The cache can store upto 150 different results.
 • If the information is not found on the cache, the naïve implementation should be
 utilized to respond to the user query. Each server will have its own zone-specific
@@ -226,14 +226,14 @@ server contains the cache then the client also knows about it. The flags at the
 command line can be used to enable cache in the server. The flags can also be used to
 notify the client that server contains cache. 
 
-## 3 Client-Side Caching
-• The Client also maintains a cache. The cache can store the results returned by the
-Server.The Client-Side Cache can store upto 45 results.
-• If the Clide-Side Cache is enabled, then the Client should check the cache to respond
+## 3 client.Client-Side Caching
+• The client.Client also maintains a cache. The cache can store the results returned by the
+server.Server.The client.Client-Side Cache can store upto 45 results.
+• If the Clide-Side Cache is enabled, then the client.Client should check the cache to respond
 to the query. If the information is not present in the cache, then it can send request to
-the Server.
-• The Client can only save and update the cache per request it receives in real-time.
-Meaning that at the very beginning the cache is empty and the Client do not perform
+the server.Server.
+• The client.Client can only save and update the cache per request it receives in real-time.
+Meaning that at the very beginning the cache is empty and the client.Client do not perform
 any pre-processing on the dataset!
 • Cache will be updated dynamically and the information that Clients keep in cache
 exceed the limit, they will release the least recently used entry from their memory and

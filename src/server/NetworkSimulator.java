@@ -1,3 +1,5 @@
+package server;
+
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.logging.*;
@@ -17,12 +19,12 @@ public class NetworkSimulator {
             // Create a registry
             Registry registry = LocateRegistry.createRegistry(PORT);
             // Bind the load balancer to the registry
-            registry.bind("LoadBalancer", new LoadBalancer());
-            LOGGER.info(String.format("LoadBalancer is running on port %d.", PORT));
+            registry.bind("server.LoadBalancer", new LoadBalancer());
+            LOGGER.info(String.format("server.LoadBalancer is running on port %d.", PORT));
             // Bind remote objects to the registry
             for (int zone = 1; zone <= AMOUNT_OF_ZONES; zone++) {
                 registry.bind(String.valueOf(zone), new Server(zone));
-                LOGGER.info(String.format("Server in zone %d is registered.%n", zone));
+                LOGGER.info(String.format("server.Server in zone %d is registered.%n", zone));
             }
         } catch (Exception e) {
             LOGGER.severe("Cannot register load balancer or servers.");

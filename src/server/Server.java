@@ -1,3 +1,7 @@
+package server;
+
+import client.Result;
+
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
@@ -6,13 +10,12 @@ import java.util.logging.Logger;
 public class Server extends UnicastRemoteObject implements StatisticsService {
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
     private static final int PORT = 1099;
-
     private final int zone;
 
     protected Server(int zone) throws RemoteException {
         super();
         this.zone = zone;
-        LOGGER.info(String.format("Server in zone %d is created.%n", zone));
+        LOGGER.info(String.format("server.Server in zone %d is created.%n", zone));
     }
 
     @Override
@@ -52,13 +55,13 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     public static void main(String[] args) {
         try {
             if (args.length != 1) {
-                System.out.println("Usage: java Server <zone number>");
+                System.out.println("Usage: java server.Server <zone number>");
                 System.exit(0);
             }
             int zone = Integer.parseInt(args[0]);
             // Get the registry on the PORT and bind a server instance to the registry
             LocateRegistry.getRegistry(PORT).bind(String.valueOf(zone), new Server(zone));
-            LOGGER.info(String.format("Server in zone %d is registered.%n", zone));
+            LOGGER.info(String.format("server.Server in zone %d is registered.%n", zone));
         } catch (Exception e) {
             LOGGER.severe("Failed to create or register a server to the registry.");
             e.printStackTrace();
