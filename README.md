@@ -3,6 +3,12 @@
 # The First Mandatory Programming Assignment: The Java-RMI International Statistics Service
 IN5020 Autumn 2023 Group G7
 
+# How to run
+``` bash
+Javac NetworkSimulator.java
+Java NetworkSimulator
+```
+
 # Objective
 1. To develop an object-based distributed system;
 2. Using the Java-RMI programming model and remote method invocation;
