@@ -3,36 +3,36 @@ import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
 
 public class Server extends UnicastRemoteObject implements StatisticsService {
-    private final String serverName;
+    private final String zone;
 
-    protected Server(String serverName) throws RemoteException {
+    protected Server(String zone) throws RemoteException {
         super();
-        this.serverName = serverName;
-        System.out.printf("Server in zone %s is created.%n", serverName);
+        this.zone = zone;
+        System.out.printf("Server in zone %s is created.%n", zone);
     }
 
     @Override
     public Result getPopulationOfCountry(String countryName) throws RemoteException {
         // Implement your code to return Result
-        return new Result(0, 0, 0, serverName); // Placeholder
+        return new Result(0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public Result getNumberOfCities(String countryName, int min) throws RemoteException {
         // Implement your code to return Result
-        return new Result(0, 0, 0, serverName); // Placeholder
+        return new Result(0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation) throws RemoteException {
         // Implement your code to return Result
-        return new Result(0, 0, 0, serverName); // Placeholder
+        return new Result(0, 0, 0, zone); // Placeholder
     }
 
     @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation) throws RemoteException {
         // Implement your code to return Result
-        return new Result(0, 0, 0, serverName); // Placeholder
+        return new Result(0, 0, 0, zone); // Placeholder
     }
 
     @Override
