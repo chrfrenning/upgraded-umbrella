@@ -1,7 +1,6 @@
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
 public class Server extends UnicastRemoteObject implements StatisticsService {
     private final String serverName;
@@ -44,18 +43,14 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
 
     public static void main(String[] args) {
         try {
-            // Expect servername as argument
+            // Expect servername as the first argument
             if (args.length != 1) {
                 System.out.println("Usage: java Server <servername>");
                 System.exit(0);
             }
-            String serverName = args[0];
-            // Expect the LoadBalancer to run first and host the registry
-            Registry registry = LocateRegistry.getRegistry(1099);
-            // Create and register the statistics service
-            StatisticsService service = new Server(serverName);
-            registry.bind(String.format("StatisticsService:%s", serverName), service); // Bind the remote object to the registry
-            System.out.printf("StatisticsService:%s is ready.%n", serverName);
+            // Get the registry on the PORT and bind a server instance to the registry
+            LocateRegistry.getRegistry(1099).bind("55", new Server("55")); // Bind the remote object to the registry
+            System.out.printf("Server in zone %s is ready.%n", "55");
         } catch (Exception e) {
             System.err.println("StatisticsService exception:");
             e.printStackTrace();
