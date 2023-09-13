@@ -1,4 +1,4 @@
-package client;
+package server;
 
 import java.io.Serializable;
 
@@ -19,7 +19,7 @@ public class Result implements Serializable {
 
     @Override
     public String toString() {
-        return "client.Result{" + serviceName +
+        return "server.Result{" + serviceName +
                 ", result=" + result +
                 ", waitingTime=" + waitingTime +
                 ", executionTime=" + executionTime +

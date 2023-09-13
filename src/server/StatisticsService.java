@@ -1,7 +1,5 @@
 package server;
 
-import client.Result;
-
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 

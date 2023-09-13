@@ -20,15 +20,10 @@ public class Client {
             }
             // Get the client zone number from command line arguments
             int zone = Integer.parseInt(args[0]);
-
-            LOGGER.info("Requesting proxy for zone..." + zone);
-            // Connect to the RMI registry on localhost, port 1099
-            // Connect to the load balancer and get a server to talk to
+            LOGGER.info("Requesting proxy for zone " + zone + " on PORT " + PORT + "...");
             Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", PORT).lookup("server.LoadBalancer");
             String serverName = loadBalancer.chooseServer(zone);
             
-            // Connect to the given statistics server
-
             LOGGER.info("Requesting service...");
             StatisticsService service = (StatisticsService) Naming.lookup(String.format("rmi://localhost:1099/%s", serverName));
 

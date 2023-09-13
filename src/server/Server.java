@@ -1,7 +1,5 @@
 package server;
 
-import client.Result;
-
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
