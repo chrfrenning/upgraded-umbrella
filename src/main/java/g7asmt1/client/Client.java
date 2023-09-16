@@ -1,7 +1,7 @@
-package client;
+package g7asmt1.client;
 
-import server.Proxy;
-import server.StatisticsService;
+import g7asmt1.server.Proxy;
+import g7asmt1.server.StatisticsService;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.util.logging.Logger;

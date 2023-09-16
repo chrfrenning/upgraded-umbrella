@@ -1,4 +1,4 @@
-package server;
+package g7asmt1.server;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;

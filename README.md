@@ -4,10 +4,12 @@
 IN5020 Autumn 2023 Group G7
 
 # How to run
-``` bash
-Javac NetworkSimulator.java
-Java NetworkSimulator
-```
+Run NetworkSimulator.java and then run Client.java
+
+# Project tools
+Maven 3.9.3
+JDK 20
+Junit
 
 # Objective
 1. To develop an object-based distributed system;

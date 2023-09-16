@@ -1,4 +1,4 @@
-package server;
+package g7asmt1.server;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
