@@ -18,7 +18,7 @@ public class NetworkSimulator {
             // Create a registry
             Registry registry = LocateRegistry.createRegistry(PORT);
             // Bind the load balancer to the registry
-            registry.bind("loadBalancer", new LoadBalancer());
+            registry.bind("loadBalancer", new LoadBalancer(AMOUNT_OF_ZONES));
             LOGGER.info(String.format("loadBalancer is running on port %d.", PORT));
             // Bind remote objects to the registry
             for (int zone = 1; zone <= AMOUNT_OF_ZONES; zone++) {
