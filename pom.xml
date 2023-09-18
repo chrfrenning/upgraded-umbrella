@@ -27,54 +27,73 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-    <groupId>com.opencsv</groupId>
-    <artifactId>opencsv</artifactId>
-    <version>5.5.2</version> <!-- Check for the latest version -->
-</dependency>
-
+      <groupId>com.opencsv</groupId>
+      <artifactId>opencsv</artifactId>
+      <version>5.8</version> <!-- Check for the latest version -->
+  </dependency>
   </dependencies>
 
   <build>
     <plugins>
+    <!-- Bundling dependencies -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.2.0</version>
-        <executions>
-          <!-- Server JAR -->
-          <execution>
-            <id>server-jar</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>server</classifier>
-              <archive>
-                <manifest>
-                  <mainClass>g7asmt1.server.NetworkSimulator</mainClass>
-                </manifest>
-              </archive>
-              <finalName>Server</finalName>
-            </configuration>
-          </execution>
-          <!-- Client JAR -->
-          <execution>
-            <id>client-jar</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>client</classifier>
-              <archive>
-                <manifest>
-                  <mainClass>g7asmt1.client.Client</mainClass>
-                </manifest>
-              </archive>
-              <finalName>Client</finalName>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.2.4</version> <!-- Use the latest version -->
+            <executions>
+                 <!-- First shaded JAR -->
+                <execution>
+                    <id>api-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <finalName>Server</finalName>
+                               <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <mainClass>g7asmt1.server.NetworkSimulator</mainClass> <!-- Replace with the main class for this jar -->
+                            </transformer>
+                        </transformers>
+                        <!-- <filters>
+                            <filter>
+                                <artifact>*:*</artifact>
+                                <excludes>
+                                    <exclude>com/example/impl/**</exclude>
+                                </excludes>
+                            </filter>
+                        </filters> -->
+                    </configuration>
+                </execution>
+                <!-- Second shaded JAR -->
+                <execution>
+                    <id>impl-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <finalName>Client</finalName>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <mainClass>g7asmt1.client.Client</mainClass> <!-- Replace with the main class for this jar -->
+                            </transformer>
+                        </transformers>
+                        <!-- <filters>
+                            <filter>
+                                <artifact>*:*</artifact>
+                                <excludes>
+                                    <exclude>com/example/api/**</exclude>
+                                </excludes>
+                            </filter>
+                        </filters> -->
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+      
+      
     </plugins>
   </build>
 </project>

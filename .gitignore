@@ -27,3 +27,4 @@ replay_pid*
 .idea/
 
 target/
+dependency-reduced-pom.xml

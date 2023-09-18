@@ -27,16 +27,10 @@ public class Client {
             StatisticsService service = (StatisticsService) Naming.lookup(String.format("rmi://localhost:%d/%s", PORT, serverName));
 
             LOGGER.info("Querying service...");
-            LOGGER.info(service.getPopulationOfCountry("USA").toString());
-            LOGGER.info(service.getPopulationOfCountry("USA").toString());
-            LOGGER.info(service.getPopulationOfCountry("USA").toString());
-            LOGGER.info(service.getPopulationOfCountry("USA").toString());
-            LOGGER.info(service.getPopulationOfCountry("USA").toString());
-            LOGGER.info(service.getPopulationOfCountry("USA").toString());
-            
-            LOGGER.info(service.getNumberOfCities("USA", 100000).toString());
-            LOGGER.info(service.getNumberOfCountries(10, 1000000).toString());
-            LOGGER.info(service.getNumberOfCountries(10, 1000000, 5000000).toString());
+            LOGGER.info(service.getPopulationOfCountry("United States").toString());
+            LOGGER.info(service.getNumberOfCities("United States", 1*10^4).toString());
+            LOGGER.info(service.getNumberOfCountries(10, 1*10^6).toString());
+            LOGGER.info(service.getNumberOfCountries(10, 1*10^4, 5*10^4).toString());
 
         } catch (Exception e) {
             LOGGER.severe("Something went wrong on the client side while querying a service.");

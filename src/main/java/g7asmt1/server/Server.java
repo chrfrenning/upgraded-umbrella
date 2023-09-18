@@ -13,101 +13,198 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class Server extends UnicastRemoteObject implements StatisticsService {
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
     private static final int PORT = 1099;
     private final int zone;
     private final ExecutorService threadPool;
     private int queueLength;
-
+    
     protected Server(int zone) throws RemoteException {
         this.zone = zone;
         this.queueLength = 0;
         this.threadPool = Executors.newSingleThreadExecutor();
         LOGGER.info(String.format("server.Server in zone %d is created.%n", zone));
     }
-
+    
     private synchronized void incrementQueueLength() {
         queueLength++;
     }
-
+    
     private synchronized void decrementQueueLength() {
         queueLength--;
     }
-
+    
     private synchronized int internalGetQueueLength() {
         return queueLength;
     }
+    
+    private List<GeoBean> LoadDataFile() throws IOException {
+        // Load
 
+        Reader reader = Files.newBufferedReader(Paths.get("./dataset/dataset.csv"));
+        CsvToBean<GeoBean> csvToBean = new CsvToBeanBuilder<GeoBean>(reader)
+            .withType(GeoBean.class)
+            .withSeparator(';')
+            .build();
+        
+        List<GeoBean> beans = csvToBean.parse();
+        
+        return beans;
+    }
+
+    private void sleepMs(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+        }
+    }
+    
     @Override
     public Result getPopulationOfCountry(String countryName) throws RemoteException {
         final Date waitingTimeStart = new Date();
         incrementQueueLength();
-
+        
         Future<Result> futureResult = threadPool.submit(new Callable<Result>() {
             @Override
-            public Result call() {
-                Date waitingTimeEnd = new Date();
-                // Perform the time-consuming task here
-                Date executionTimeStart = new Date();
-                // Sleep 5 seconds
+            public Result call() throws Exception {
                 try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Date waitingTimeEnd = new Date();
+                    Date executionTimeStart = new Date();
+
+                    // Query the dataset
+                    long population = 0;
+                    try {
+                        List<GeoBean> beans = LoadDataFile();
+                        population = beans.stream()
+                            .filter(bean -> countryName.equals(bean.getCountryNameEN()))
+                            .mapToLong(GeoBean::getPopulation)
+                            .sum();
+                    } catch (IOException e) {
+                        throw new Exception("Error occurred while processing the dataset", e);
+                    }
+
+                    Date executionTimeEnd = new Date();
+                    return new Result("getPopulation", population, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                } finally {
+                    decrementQueueLength();
                 }
-                int population = getPopulation(countryName);  // Replace with real implementation
-                int area = getArea(countryName);  // Replace with real implementation
-                Date executionTimeEnd = new Date();
-                decrementQueueLength();
-                return new Result("getPopulation", population, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
             }
         });
-
+        
         try {
             return futureResult.get();  // This will block until the future is completed
         } catch (InterruptedException | ExecutionException e) {
             throw new RemoteException("Error occurred while processing", e);
         }
     }
-
-    private int getPopulation(String countryName) {
-        // TODO
-        return 88;
-    }
-
-    private int getArea(String countryName) {
-        // TODO
-        return 7;
-    }
-
+    
     @Override
     public Result getNumberOfCities(String countryName, int min) throws RemoteException {
-        // TODO
-        return new Result("getNumberOfCities", 0, 0, 0, zone); // Placeholder
-    }
+        final Date waitingTimeStart = new Date();
+        incrementQueueLength();
+        
+        Future<Result> futureResult = threadPool.submit(new Callable<Result>() {
+            @Override
+            public Result call() throws Exception {
+                try {
+                    Date waitingTimeEnd = new Date();
+                    Date executionTimeStart = new Date();
 
+                    // Query the dataset
+                    long cities = 0;
+                    try {
+                        List<GeoBean> beans = LoadDataFile();
+                        cities = beans.stream()
+                            .filter(bean -> countryName.equals(bean.getCountryNameEN()))
+                            .mapToLong(GeoBean::getPopulation)
+                            .filter(population -> population >= min)
+                            .count();
+                    } catch (IOException e) {
+                        throw new Exception("Error occurred while processing the dataset", e);
+                    }
+
+                    Date executionTimeEnd = new Date();
+                    return new Result("getNumberOfCities", cities, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                } finally {
+                    decrementQueueLength();
+                }
+            }
+        });
+        
+        try {
+            return futureResult.get();  // This will block until the future is completed
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RemoteException("Error occurred while processing", e);
+        }
+    }
+    
     @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation) throws RemoteException {
-        // TODO
-        return new Result("getNumberOfCountries", 0, 0, 0, zone); // Placeholder
+        return getNumberOfCountries(cityCount, minPopulation, Integer.MAX_VALUE);
     }
-
+    
     @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation) throws RemoteException {
-        // TODO
-        return new Result("getNumberOfCountries", 0, 0, 0, zone); // Placeholder
-    }
+        final Date waitingTimeStart = new Date();
+        incrementQueueLength();
+        
+        Future<Result> futureResult = threadPool.submit(new Callable<Result>() {
+            @Override
+            public Result call() throws Exception {
+                try {
+                    Date waitingTimeEnd = new Date();
+                    Date executionTimeStart = new Date();
 
+                    // Query the dataset
+                    long countries = 0;
+                    try {
+                        List<GeoBean> beans = LoadDataFile();
+                        countries = beans.stream()
+                            .filter(geoBean -> geoBean.getPopulation() >= minPopulation && geoBean.getPopulation() <= maxPopulation)
+                            .collect(Collectors.groupingBy(GeoBean::getCountryNameEN))
+                            .entrySet().stream()
+                            .filter(entry -> entry.getValue().size() >= cityCount)
+                            .count();
+
+                    } catch (IOException e) {
+                        throw new Exception("Error occurred while processing the dataset", e);
+                    }
+
+                    Date executionTimeEnd = new Date();
+                    return new Result("getNumberOfCountries", countries, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                } finally {
+                    decrementQueueLength();
+                }
+            }
+        });
+        
+        try {
+            return futureResult.get();  // This will block until the future is completed
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RemoteException("Error occurred while processing", e);
+        }
+    }
+    
     @Override
     public int getQueueLength() throws RemoteException {
         return internalGetQueueLength();
     }
-
+    
     /** Initiates a service in a zone and binds to the registry in a given port.
-     *
-     * @param args A unique zone number as the first argument
-     */
+    *
+    * @param args A unique zone number as the first argument
+    */
     public static void main(String[] args) {
         try {
             if (args.length != 1) {
