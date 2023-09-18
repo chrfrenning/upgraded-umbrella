@@ -5,8 +5,8 @@
   <artifactId>upgraded-umbrella</artifactId>
   <packaging>jar</packaging>
   <properties>
-    <maven.compiler.source>20</maven.compiler.source>
-    <maven.compiler.target>20</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
   </properties>
   <version>1.0-SNAPSHOT</version>
   <name>upgraded-umbrella</name>
@@ -25,4 +25,26 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+
+<build>
+    <plugins>
+        <!-- Other plugins can be here -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.2.0</version> <!-- Use the appropriate version -->
+            <configuration>
+                <archive>
+                    <manifest>
+                        <addClasspath>true</addClasspath>
+                        <classpathPrefix>lib/</classpathPrefix>
+                        <mainClass>g7asmt1.server.NetworkSimulator</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
 </project>

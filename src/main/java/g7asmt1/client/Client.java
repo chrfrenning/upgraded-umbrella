@@ -28,6 +28,12 @@ public class Client {
 
             LOGGER.info("Querying service...");
             LOGGER.info(service.getPopulationOfCountry("USA").toString());
+            LOGGER.info(service.getPopulationOfCountry("USA").toString());
+            LOGGER.info(service.getPopulationOfCountry("USA").toString());
+            LOGGER.info(service.getPopulationOfCountry("USA").toString());
+            LOGGER.info(service.getPopulationOfCountry("USA").toString());
+            LOGGER.info(service.getPopulationOfCountry("USA").toString());
+            
             LOGGER.info(service.getNumberOfCities("USA", 100000).toString());
             LOGGER.info(service.getNumberOfCountries(10, 1000000).toString());
             LOGGER.info(service.getNumberOfCountries(10, 1000000, 5000000).toString());

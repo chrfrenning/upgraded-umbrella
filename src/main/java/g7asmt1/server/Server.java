@@ -5,21 +5,58 @@ import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
 import java.util.logging.Logger;
 
+import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 public class Server extends UnicastRemoteObject implements StatisticsService {
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
     private static final int PORT = 1099;
     private final int zone;
+    private final ExecutorService threadPool;
 
     protected Server(int zone) throws RemoteException {
-        super();
         this.zone = zone;
+        this.threadPool = Executors.newSingleThreadExecutor();
         LOGGER.info(String.format("server.Server in zone %d is created.%n", zone));
     }
 
     @Override
     public Result getPopulationOfCountry(String countryName) throws RemoteException {
+        Date waitingTimeStart = new Date();
+
+        Future<Result> futureResult = threadPool.submit(new Callable<Result>() {
+            @Override
+            public Result call() {
+                Date waitingTimeEnd = new Date();
+                // Perform the time-consuming task here
+                Date executionTimeStart = new Date();
+                int population = getPopulation(countryName);  // Replace with real implementation
+                int area = getArea(countryName);  // Replace with real implementation
+                Date executionTimeEnd = new Date();
+                return new Result("getPopulation", population, waitingTimeStart.getTime() - waitingTimeEnd.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+            }
+        });
+
+        try {
+            return futureResult.get();  // This will block until the future is completed
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RemoteException("Error occurred while processing", e);
+        }
+    }
+
+    private int getPopulation(String countryName) {
         // TODO
-        return new Result("getPopulationOfCountry", 0, 0, 0, zone); // Placeholder
+        return 0;
+    }
+
+    private int getArea(String countryName) {
+        // TODO
+        return 0;
     }
 
     @Override
