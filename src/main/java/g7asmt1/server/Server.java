@@ -1,28 +1,27 @@
 package g7asmt1.server;
 
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
-import java.rmi.registry.LocateRegistry;
-import java.util.logging.Logger;
-
-import java.rmi.RemoteException;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.logging.Logger;
+
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.rmi.registry.LocateRegistry;
 
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+
 
 public class Server extends UnicastRemoteObject implements StatisticsService {
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
@@ -37,32 +36,6 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
         this.threadPool = Executors.newSingleThreadExecutor();
         LOGGER.info(String.format("server.Server in zone %d is created.%n", zone));
     }
-    
-    private synchronized void incrementQueueLength() {
-        queueLength++;
-    }
-    
-    private synchronized void decrementQueueLength() {
-        queueLength--;
-    }
-    
-    private synchronized int internalGetQueueLength() {
-        return queueLength;
-    }
-    
-    private List<GeoBean> LoadDataFile() throws IOException {
-        // Load
-
-        Reader reader = Files.newBufferedReader(Paths.get("./dataset/dataset.csv"));
-        CsvToBean<GeoBean> csvToBean = new CsvToBeanBuilder<GeoBean>(reader)
-            .withType(GeoBean.class)
-            .withSeparator(';')
-            .build();
-        
-        List<GeoBean> beans = csvToBean.parse();
-        
-        return beans;
-    }
 
     private void sleepMs(int ms) {
         try {
@@ -70,6 +43,12 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
         } catch (InterruptedException e) {
         }
     }
+
+    /*
+     * Our request methods, these are invoked by RMI, we then queue the request
+     * for processing in a single thread threadpool, which we know java uses a fifo
+     * queue for so we can guarantee the ordering of the requests per assignment text.
+     */
     
     @Override
     public Result getPopulationOfCountry(String countryName) throws RemoteException {
@@ -195,12 +174,48 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
             throw new RemoteException("Error occurred while processing", e);
         }
     }
+
+    /* 
+     * Manages the queue length, we manually increment and decrement as we queue
+     * and process the requests.
+     */
     
     @Override
     public int getQueueLength() throws RemoteException {
         return internalGetQueueLength();
     }
     
+    private synchronized void incrementQueueLength() {
+        queueLength++;
+    }
+    
+    private synchronized void decrementQueueLength() {
+        queueLength--;
+    }
+    
+    private synchronized int internalGetQueueLength() {
+        return queueLength;
+    }
+
+
+    /* 
+     * Loading our dataset, note we're not caching or keeping this,
+     * this is the raw version that always loads from the file (note
+     * disk caching will be substantial on any modern os with sufficient memory)
+     */
+    
+    private List<GeoBean> LoadDataFile() throws IOException {
+        Reader reader = Files.newBufferedReader(Paths.get("./dataset/dataset.csv"));
+        CsvToBean<GeoBean> csvToBean = new CsvToBeanBuilder<GeoBean>(reader)
+            .withType(GeoBean.class)
+            .withSeparator(';')
+            .build();
+        
+        List<GeoBean> beans = csvToBean.parse();
+        return beans;
+    }
+    
+
     /** Initiates a service in a zone and binds to the registry in a given port.
     *
     * @param args A unique zone number as the first argument
