@@ -37,7 +37,7 @@ public class Client {
                     case "getPopulationofCountry":
                         {
                             String country = String.join(" ", sliceArgs(lineArray, 1, lineArray.length-1));
-                            LOGGER.info(getService(loadBalancer, zone).getPopulationOfCountry(country).toString());
+                            LOGGER.info(getService(loadBalancer, zone).getPopulationOfCountry(country, zone).toString());
                             break;
                         }
 
@@ -46,7 +46,7 @@ public class Client {
                             final int numArgs = 2;
                             String country = String.join(" ", sliceArgs(lineArray, 1, lineArray.length - numArgs));
                             int minPopulation = Integer.parseInt(lineArray[lineArray.length - numArgs]);
-                            LOGGER.info(getService(loadBalancer, zone).getNumberOfCities(country, minPopulation).toString());
+                            LOGGER.info(getService(loadBalancer, zone).getNumberOfCities(country, minPopulation, zone).toString());
                             break;
                         }
                         
@@ -57,12 +57,12 @@ public class Client {
                                 int minCities = Integer.parseInt(lineArray[2]);
                                 int minPopulation = Integer.parseInt(lineArray[3]);
                                 int maxPopulation = Integer.parseInt(lineArray[4]);
-                                LOGGER.info(getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, maxPopulation).toString());
+                                LOGGER.info(getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, maxPopulation, zone).toString());
                             } else {
                                 // call getNumberofCountries with 2 arguments
                                 int minCities = Integer.parseInt(lineArray[2]);
                                 int minPopulation = Integer.parseInt(lineArray[3]);
-                                LOGGER.info(getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation).toString());
+                                LOGGER.info(getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, zone).toString());
                             }
                             break;
                         }

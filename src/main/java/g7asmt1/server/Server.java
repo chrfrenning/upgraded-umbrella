@@ -37,13 +37,6 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
         LOGGER.info(String.format("server.Server in zone %d is created.%n", zone));
     }
 
-    private void sleepMs(int ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-        }
-    }
-
     /*
      * Our request methods, these are invoked by RMI, we then queue the request
      * for processing in a single thread threadpool, which we know java uses a fifo
@@ -51,7 +44,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
      */
     
     @Override
-    public Result getPopulationOfCountry(String countryName) throws RemoteException {
+    public Result getPopulationOfCountry(String countryName, int clientZone) throws RemoteException {
         final Date waitingTimeStart = new Date();
         incrementQueueLength();
         
@@ -61,6 +54,8 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                 try {
                     Date waitingTimeEnd = new Date();
                     Date executionTimeStart = new Date();
+
+                    sleepMs(clientZone == zone ? 80 : 170);
 
                     // Query the dataset
                     long population = 0;
@@ -90,7 +85,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     }
     
     @Override
-    public Result getNumberOfCities(String countryName, int min) throws RemoteException {
+    public Result getNumberOfCities(String countryName, int min, int clientZone) throws RemoteException {
         final Date waitingTimeStart = new Date();
         incrementQueueLength();
         
@@ -100,6 +95,8 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                 try {
                     Date waitingTimeEnd = new Date();
                     Date executionTimeStart = new Date();
+
+                    sleepMs(clientZone == zone ? 80 : 170);
 
                     // Query the dataset
                     long cities = 0;
@@ -130,12 +127,12 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     }
     
     @Override
-    public Result getNumberOfCountries(int cityCount, int minPopulation) throws RemoteException {
+    public Result getNumberOfCountries(int cityCount, int minPopulation, int clientZone) throws RemoteException {
         return getNumberOfCountries(cityCount, minPopulation, Integer.MAX_VALUE);
     }
     
     @Override
-    public Result getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation) throws RemoteException {
+    public Result getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation, int clientZone) throws RemoteException {
         final Date waitingTimeStart = new Date();
         incrementQueueLength();
         
@@ -145,6 +142,8 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                 try {
                     Date waitingTimeEnd = new Date();
                     Date executionTimeStart = new Date();
+
+                    sleepMs(clientZone == zone ? 80 : 170);
 
                     // Query the dataset
                     long countries = 0;
@@ -175,6 +174,8 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
         }
     }
 
+
+
     /* 
      * Manages the queue length, we manually increment and decrement as we queue
      * and process the requests.
@@ -198,6 +199,20 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     }
 
 
+
+    /*
+     * Utilities
+     */
+
+    private void sleepMs(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+        }
+    }
+
+
+
     /* 
      * Loading our dataset, note we're not caching or keeping this,
      * this is the raw version that always loads from the file (note
@@ -215,6 +230,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
         return beans;
     }
     
+
 
     /** Initiates a service in a zone and binds to the registry in a given port.
     *
