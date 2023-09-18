@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Server extends UnicastRemoteObject implements StatisticsService {
@@ -170,12 +171,27 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                     long countries = 0;
                     try {
                         List<GeoBean> beans = LoadDataFile();
-                        countries = beans.stream()
+                        // countries = beans.stream()
+                        //     .filter(geoBean -> geoBean.getPopulation() >= minPopulation && geoBean.getPopulation() <= maxPopulation)
+                        //     .collect(Collectors.groupingBy(GeoBean::getCountryNameEN))
+                        //     .entrySet().stream()
+                        //     .filter(entry -> entry.getValue().size() >= cityCount)
+                        //     .count();
+
+                        Map<String, List<GeoBean>> groupedByCountry = beans.stream()
                             .filter(geoBean -> geoBean.getPopulation() >= minPopulation && geoBean.getPopulation() <= maxPopulation)
-                            .collect(Collectors.groupingBy(GeoBean::getCountryNameEN))
-                            .entrySet().stream()
+                            .collect(Collectors.groupingBy(GeoBean::getCountryNameEN));
+
+                        // Debug: Print out intermediate data
+                        for (Map.Entry<String, List<GeoBean>> entry : groupedByCountry.entrySet()) {
+                            System.out.println("Country: " + entry.getKey() + ", Cities Count: " + entry.getValue().size());
+                        }
+
+                        countries = groupedByCountry.entrySet().stream()
                             .filter(entry -> entry.getValue().size() >= cityCount)
                             .count();
+
+                        System.out.println("Number of countries with at least " + cityCount + " cities: " + countries);
 
                     } catch (IOException e) {
                         throw new Exception("Error occurred while processing the dataset", e);
