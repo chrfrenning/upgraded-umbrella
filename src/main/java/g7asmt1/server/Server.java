@@ -27,7 +27,8 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
 
     @Override
     public Result getPopulationOfCountry(String countryName) throws RemoteException {
-        Date waitingTimeStart = new Date();
+        final Date waitingTimeStart = new Date();
+        final long waitingTimeLong = waitingTimeStart.getTime();
 
         Future<Result> futureResult = threadPool.submit(new Callable<Result>() {
             @Override
@@ -35,10 +36,16 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                 Date waitingTimeEnd = new Date();
                 // Perform the time-consuming task here
                 Date executionTimeStart = new Date();
+                // Sleep 5 seconds
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 int population = getPopulation(countryName);  // Replace with real implementation
                 int area = getArea(countryName);  // Replace with real implementation
                 Date executionTimeEnd = new Date();
-                return new Result("getPopulation", population, waitingTimeStart.getTime() - waitingTimeEnd.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                return new Result("getPopulation", population, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
             }
         });
 
@@ -51,12 +58,12 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
 
     private int getPopulation(String countryName) {
         // TODO
-        return 0;
+        return 88;
     }
 
     private int getArea(String countryName) {
         // TODO
-        return 0;
+        return 7;
     }
 
     @Override

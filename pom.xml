@@ -4,13 +4,15 @@
   <groupId>g7asmt1</groupId>
   <artifactId>upgraded-umbrella</artifactId>
   <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>upgraded-umbrella</name>
+  <url>http://maven.apache.org</url>
+
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
   </properties>
-  <version>1.0-SNAPSHOT</version>
-  <name>upgraded-umbrella</name>
-  <url>http://maven.apache.org</url>
+
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -26,25 +28,47 @@
     </dependency>
   </dependencies>
 
-
-<build>
+  <build>
     <plugins>
-        <!-- Other plugins can be here -->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>3.2.0</version> <!-- Use the appropriate version -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <!-- Server JAR -->
+          <execution>
+            <id>server-jar</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
             <configuration>
-                <archive>
-                    <manifest>
-                        <addClasspath>true</addClasspath>
-                        <classpathPrefix>lib/</classpathPrefix>
-                        <mainClass>g7asmt1.server.NetworkSimulator</mainClass>
-                    </manifest>
-                </archive>
+              <classifier>server</classifier>
+              <archive>
+                <manifest>
+                  <mainClass>g7asmt1.server.NetworkSimulator</mainClass>
+                </manifest>
+              </archive>
+              <finalName>Server</finalName>
             </configuration>
-        </plugin>
+          </execution>
+          <!-- Client JAR -->
+          <execution>
+            <id>client-jar</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>client</classifier>
+              <archive>
+                <manifest>
+                  <mainClass>g7asmt1.client.Client</mainClass>
+                </manifest>
+              </archive>
+              <finalName>Client</finalName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
-</build>
-
+  </build>
 </project>
