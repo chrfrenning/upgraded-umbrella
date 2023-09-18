@@ -1,12 +1,14 @@
 package g7asmt1.client;
 
 import g7asmt1.server.Proxy;
+import g7asmt1.server.Result;
 import g7asmt1.server.StatisticsService;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Client {
@@ -15,6 +17,17 @@ public class Client {
 
     public static void main(String[] args) {
         try {
+            // Let's have a cache
+            Cache cache = new Cache();
+
+            // Check argument list for --cache and enable the cache, else disable it
+            cache.disable();
+            for (String arg : args) {
+                if (arg.equals("--cache")) {
+                    cache.enable();
+                }
+            }
+
             // Connect to the loadbalancer
             Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", PORT).lookup("loadBalancer");
 
@@ -36,17 +49,35 @@ public class Client {
                 switch( lineArray[0] ) {
                     case "getPopulationofCountry":
                         {
+                            Result res = cache.get(lineArray[0], sliceArgs(lineArray, 1, lineArray.length-1));
+                            if (res != null) {
+                                LOGGER.info(res.toString());
+                                break;
+                            }
                             String country = String.join(" ", sliceArgs(lineArray, 1, lineArray.length-1));
-                            LOGGER.info(getService(loadBalancer, zone).getPopulationOfCountry(country, zone).toString());
+                            res = getService(loadBalancer, zone).getPopulationOfCountry(country, zone);
+                            LOGGER.info(res.toString());
+
+                            cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length-1), res);
                             break;
                         }
 
                     case "getNumberofCities":
                         {
                             final int numArgs = 2;
+
+                            Result res = cache.get(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs));
+                            if (res != null) {
+                                LOGGER.info(res.toString());
+                                break;
+                            }
+
                             String country = String.join(" ", sliceArgs(lineArray, 1, lineArray.length - numArgs));
                             int minPopulation = Integer.parseInt(lineArray[lineArray.length - numArgs]);
-                            LOGGER.info(getService(loadBalancer, zone).getNumberOfCities(country, minPopulation, zone).toString());
+                            res = getService(loadBalancer, zone).getNumberOfCities(country, minPopulation, zone);
+                            LOGGER.info(res.toString());
+
+                            cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs), res);
                             break;
                         }
                         
@@ -54,17 +85,42 @@ public class Client {
                         {
                             if (lineArray.length == 5) {
                                 // call getNumberofCountries with 3 arguments
-                                int minCities = Integer.parseInt(lineArray[2]);
-                                int minPopulation = Integer.parseInt(lineArray[3]);
-                                int maxPopulation = Integer.parseInt(lineArray[4]);
-                                LOGGER.info(getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, maxPopulation, zone).toString());
+                                final int numArgs = 3;
+
+                                Result res = cache.get(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs));
+                                if (res != null) {
+                                    LOGGER.info(res.toString());
+                                    break;
+                                }
+
+                                int minCities = Integer.parseInt(lineArray[1]);
+                                int minPopulation = Integer.parseInt(lineArray[2]);
+                                int maxPopulation = Integer.parseInt(lineArray[3]);
+                                res = getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, maxPopulation, zone);
+                                LOGGER.info(res.toString());
+
+                                cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs), res);
+                                break;
+
                             } else {
                                 // call getNumberofCountries with 2 arguments
-                                int minCities = Integer.parseInt(lineArray[2]);
-                                int minPopulation = Integer.parseInt(lineArray[3]);
-                                LOGGER.info(getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, zone).toString());
+                                final int numArgs = 2;
+
+                                Result res = cache.get(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs));
+                                if (res != null) {
+                                    LOGGER.info(res.toString());
+                                    break;
+                                }
+
+                                int minCities = Integer.parseInt(lineArray[1]);
+                                int minPopulation = Integer.parseInt(lineArray[2]);
+                                res = getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, zone);
+                                LOGGER.info(res.toString());
+
+                                cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs), res);
+                                break;
                             }
-                            break;
+                            
                         }
                 }
 

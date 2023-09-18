@@ -3,11 +3,13 @@ package g7asmt1.server;
 import java.io.Serializable;
 
 public class Result implements Serializable {
-    private final String serviceName;
-    private final long result;
-    private final long waitingTime;
-    private final long executionTime;
-    private final int zone;
+    public String serviceName;
+    public long result;
+    public long waitingTime;
+    public long executionTime;
+    public int zone;
+    public boolean serverCacheHit;
+    public boolean clientCacheHit;
 
     public Result(String serviceName, long result, long waitingTime, long executionTime, int zone) {
         this.serviceName = serviceName;
@@ -15,6 +17,18 @@ public class Result implements Serializable {
         this.waitingTime = waitingTime;
         this.executionTime = executionTime;
         this.zone = zone;
+        this.serverCacheHit = false;
+        this.clientCacheHit = false;
+    }
+
+    public Result(String serviceName, long result, long waitingTime, long executionTime, int zone, boolean serverCacheHit, boolean clientCacheHit) {
+        this.serviceName = serviceName;
+        this.result = result;
+        this.waitingTime = waitingTime;
+        this.executionTime = executionTime;
+        this.zone = zone;
+        this.serverCacheHit = serverCacheHit;
+        this.clientCacheHit = clientCacheHit;
     }
 
     @Override
@@ -24,6 +38,8 @@ public class Result implements Serializable {
                 ", waitingTime=" + waitingTime +
                 ", executionTime=" + executionTime +
                 ", zone=" + zone +
+                ", serverCacheHit=" + serverCacheHit +
+                ", clientCacheHit=" + clientCacheHit +
                 '}';
     }
 }

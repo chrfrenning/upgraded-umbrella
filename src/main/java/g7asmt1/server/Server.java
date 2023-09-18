@@ -128,7 +128,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     
     @Override
     public Result getNumberOfCountries(int cityCount, int minPopulation, int clientZone) throws RemoteException {
-        return getNumberOfCountries(cityCount, minPopulation, Integer.MAX_VALUE);
+        return getNumberOfCountries(cityCount, minPopulation, Integer.MAX_VALUE, clientZone);
     }
     
     @Override
