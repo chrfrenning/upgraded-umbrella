@@ -18,17 +18,31 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     private static final int PORT = 1099;
     private final int zone;
     private final ExecutorService threadPool;
+    private int queueLength;
 
     protected Server(int zone) throws RemoteException {
         this.zone = zone;
+        this.queueLength = 0;
         this.threadPool = Executors.newSingleThreadExecutor();
         LOGGER.info(String.format("server.Server in zone %d is created.%n", zone));
+    }
+
+    private synchronized void incrementQueueLength() {
+        queueLength++;
+    }
+
+    private synchronized void decrementQueueLength() {
+        queueLength--;
+    }
+
+    private synchronized int internalGetQueueLength() {
+        return queueLength;
     }
 
     @Override
     public Result getPopulationOfCountry(String countryName) throws RemoteException {
         final Date waitingTimeStart = new Date();
-        final long waitingTimeLong = waitingTimeStart.getTime();
+        incrementQueueLength();
 
         Future<Result> futureResult = threadPool.submit(new Callable<Result>() {
             @Override
@@ -45,6 +59,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                 int population = getPopulation(countryName);  // Replace with real implementation
                 int area = getArea(countryName);  // Replace with real implementation
                 Date executionTimeEnd = new Date();
+                decrementQueueLength();
                 return new Result("getPopulation", population, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
             }
         });
@@ -86,8 +101,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
 
     @Override
     public int getQueueLength() throws RemoteException {
-        // TODO
-        return 0;
+        return internalGetQueueLength();
     }
 
     /** Initiates a service in a zone and binds to the registry in a given port.
