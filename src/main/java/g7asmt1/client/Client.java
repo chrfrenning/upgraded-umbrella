@@ -1,10 +1,24 @@
 package g7asmt1.client;
 
+import g7asmt1.server.GeoBean;
 import g7asmt1.server.Proxy;
 import g7asmt1.server.StatisticsService;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
+import java.util.List;
 import java.util.logging.Logger;
+
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+
+
 
 public class Client {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
@@ -12,29 +26,79 @@ public class Client {
 
     public static void main(String[] args) {
         try {
-            // Check that we have correct arguments
-            if (args.length != 1) {
-                System.out.println("Usage: java client.Client <zone>");
-                return;
-            }
-            // Get the client zone number from command line arguments
-            int zone = Integer.parseInt(args[0]);
-            LOGGER.info("Requesting proxy for zone " + zone + " on PORT " + PORT + "...");
+            // Connect to the loadbalancer
             Proxy loadBalancer = (Proxy) LocateRegistry.getRegistry("localhost", PORT).lookup("loadBalancer");
-            String serverName = loadBalancer.chooseServer(zone);
-            
-            LOGGER.info("Requesting service...");
-            StatisticsService service = (StatisticsService) Naming.lookup(String.format("rmi://localhost:%d/%s", PORT, serverName));
 
-            LOGGER.info("Querying service...");
-            LOGGER.info(service.getPopulationOfCountry("Norway").toString());
-            LOGGER.info(service.getPopulationOfCountry("Sweden").toString());
-            LOGGER.info(service.getNumberOfCities("Norway", 100000).toString());
-            LOGGER.info(service.getNumberOfCountries(30, 100000, 800000).toString());
+            // Open ./dataset/input.txt and read line by line
+            BufferedReader reader = new BufferedReader(new FileReader("./dataset/input.txt"));
+            String line = reader.readLine();
 
+            while (line != null) {
+                // Do something with the line
+                System.out.println(line);
+
+                // Input file has some double spaces, replace with single
+                line = line.replaceAll("\\s+", " ");
+
+                // split the line into an array
+                String[] lineArray = line.split(" ");
+                int zone = Integer.parseInt(lineArray[lineArray.length-1].split(":")[1]);
+
+                switch( lineArray[0] ) {
+                    case "getPopulationofCountry":
+                        {
+                            String country = String.join(" ", sliceArgs(lineArray, 1, lineArray.length-1));
+                            LOGGER.info(getService(loadBalancer, zone).getPopulationOfCountry(country).toString());
+                            break;
+                        }
+
+                    case "getNumberofCities":
+                        {
+                            final int numArgs = 2;
+                            String country = String.join(" ", sliceArgs(lineArray, 1, lineArray.length - numArgs));
+                            int minPopulation = Integer.parseInt(lineArray[lineArray.length - numArgs]);
+                            LOGGER.info(getService(loadBalancer, zone).getNumberOfCities(country, minPopulation).toString());
+                            break;
+                        }
+                        
+                    case "getNumberofCountries":
+                        {
+                            if (lineArray.length == 5) {
+                                // call getNumberofCountries with 3 arguments
+                                int minCities = Integer.parseInt(lineArray[2]);
+                                int minPopulation = Integer.parseInt(lineArray[3]);
+                                int maxPopulation = Integer.parseInt(lineArray[4]);
+                                LOGGER.info(getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, maxPopulation).toString());
+                            } else {
+                                // call getNumberofCountries with 2 arguments
+                                int minCities = Integer.parseInt(lineArray[2]);
+                                int minPopulation = Integer.parseInt(lineArray[3]);
+                                LOGGER.info(getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation).toString());
+                            }
+                            break;
+                        }
+                }
+
+                line = reader.readLine();
+            }
+            reader.close();
         } catch (Exception e) {
             LOGGER.severe("Something went wrong on the client side while querying a service.");
             e.printStackTrace();
         }
+    }
+
+    private static String[] sliceArgs(String[] args, int start, int end) {
+        String[] slicedArgs = new String[end - start];
+        for (int i = start; i < end; i++) {
+            slicedArgs[i - start] = args[i];
+        }
+        return slicedArgs;
+    }
+
+    private static StatisticsService getService(Proxy loadBalancer, int zone) throws Exception {
+        String serverName = loadBalancer.chooseServer(zone);
+        StatisticsService service = (StatisticsService) Naming.lookup(String.format("rmi://localhost:%d/%s", PORT, serverName));
+        return service;
     }
 }
