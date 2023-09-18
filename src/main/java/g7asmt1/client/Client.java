@@ -1,24 +1,13 @@
 package g7asmt1.client;
 
-import g7asmt1.server.GeoBean;
 import g7asmt1.server.Proxy;
 import g7asmt1.server.StatisticsService;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.io.FileReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
-import java.util.List;
 import java.util.logging.Logger;
-
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-
-
 
 public class Client {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
