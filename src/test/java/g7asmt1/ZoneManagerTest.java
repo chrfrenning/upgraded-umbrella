@@ -15,19 +15,19 @@ public class ZoneManagerTest {
 
     @ParameterizedTest
     @CsvSource({"1, 1", "2, 2", "3, 3", "4, 4", "5, 5"})
-    void isSameZoneTest(String zone, int clientZone){
+    void testIsSameZone(String zone, int clientZone){
         assert (zm.isSameZone(zone, clientZone));
     }
 
     @ParameterizedTest
     @CsvSource({"2, 1", "3, 2", "4, 3", "5, 4", "1, 5", "2, 6", "1, 0"})
-    void isClosestZoneTest(String zone, int clientZone) {
+    void testIsClosestZone(String zone, int clientZone) {
         assert(zm.isClosestZone(zone, clientZone));
     }
 
     @ParameterizedTest
     @CsvSource({"3, 1", "4, 2", "5, 3", "1, 4", "2, 5"})
-    void isNeighbourTest(String zone, int clientZone) {
+    void testIsNeighbour(String zone, int clientZone) {
         assert(zm.isNeighbour(zone, clientZone));
     }
 }

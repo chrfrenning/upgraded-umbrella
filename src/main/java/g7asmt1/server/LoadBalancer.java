@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class LoadBalancer extends UnicastRemoteObject implements Proxy {
@@ -31,13 +32,14 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
 
         // Query the RMI service to list all services that start with "server.StatisticsService:"
         // Iterate through the list of services and find the one with the least load
-        return Arrays.stream(LocateRegistry.getRegistry("localhost", PORT).list())
+        Optional<String> chosenServer = Arrays.stream(LocateRegistry.getRegistry("localhost", PORT).list())
                 .peek(zone -> LOGGER.info("Considering zone " + zone))
                 .filter(zone -> !tasks.isBusy(zone)
                         && (zones.isSameZone(zone, clientZone)
                         || zones.isClosestZone(zone, clientZone)
                         || zones.isNeighbour(zone, clientZone)))
-                .findFirst()
-                .orElseThrow(() -> new RemoteException("No server available at the moment for zone " + clientZone));
+                .findFirst();
+
+        return chosenServer.orElse(tasks.lessTasks());
     }
 }
