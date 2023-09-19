@@ -1,8 +1,6 @@
 package g7asmt1;
 
 import g7asmt1.server.TaskManager;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,27 +10,46 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.rmi.RemoteException;
 import java.util.stream.Stream;
 
-public class TaskManagerTest {
-    private TaskManager tm;
+import static org.junit.jupiter.api.Assertions.*;
 
-    @BeforeEach
-    void setUp() {
-        tm = new TaskManager(5);
+public class TaskManagerTest {
+
+    @ParameterizedTest
+    @CsvSource({"1", "2", "3", "4", "5"})
+    void testIsBusy_notBusy(String zone){
+        TaskManager tm = new TaskManager(new int[] {0, 1, 5, 6, 7, 0});
+        assertFalse(tm.isBusy(zone));
     }
 
     @ParameterizedTest
     @CsvSource({"1", "2", "3", "4", "5"})
-    void testIsBusy(String zone){
+    void testIsBusy_busy(String zone){
+        TaskManager tm = new TaskManager(new int[] {0, 8, 9, 17, 18, 16});
         assert(tm.isBusy(zone));
     }
+
     @ParameterizedTest
-    @MethodSource("testCases")
-    public void testLessTasks(int[] counter, String expected) throws RemoteException {
-        TaskManager taskManager = new TaskManager(counter);
-        assertEquals(expected, taskManager.lessTasks());
+    @CsvSource({"1", "2", "3", "4", "5"})
+    void testIsOverloaded_notOverloaded(String zone){
+        TaskManager tm = new TaskManager(new int[] {0, 7, 8, 9, 17, 1});
+        assertFalse(tm.isOverloaded(zone));
     }
 
-    private static Stream<Arguments> testCases() {
+    @ParameterizedTest
+    @CsvSource({"1", "2", "3", "4", "5"})
+    void testIsOverloaded_overloaded(String zone){
+        TaskManager tm = new TaskManager(new int[] {0, 18, 19, 20, 100, 1000});
+        assert(tm.isOverloaded(zone));
+    }
+
+    @ParameterizedTest
+    @MethodSource("testCases_lessTasks")
+    public void testLessTasks(int[] counter, String expected) throws RemoteException {
+        TaskManager tm = new TaskManager(counter);
+        assertEquals(expected, tm.lessTasks());
+    }
+
+    private static Stream<Arguments> testCases_lessTasks() {
         return Stream.of(
                 Arguments.of(new int[] {0, 1, 2, 3, 4, 5}, "1"),      // Minimum at index 0
                 Arguments.of(new int[] {0, 5, 3, 2, 1, 4}, "4"),   // Minimum at index 3
@@ -40,6 +57,7 @@ public class TaskManagerTest {
                 Arguments.of(new int[] {0, 6}, "1")               // Single meaningful element
         );
     }
+
     @Test
     public void testLessTasksWithException_notInitialized() {
         TaskManager taskManager = new TaskManager(new int[0]); // An empty array that will trigger the exception

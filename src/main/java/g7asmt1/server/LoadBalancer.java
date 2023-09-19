@@ -32,14 +32,15 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
 
         // Query the RMI service to list all services that start with "server.StatisticsService:"
         // Iterate through the list of services and find the one with the least load
-        Optional<String> chosenServer = Arrays.stream(LocateRegistry.getRegistry("localhost", PORT).list())
+        Optional<String> chosenByZone = Arrays.stream(LocateRegistry.getRegistry("localhost", PORT).list())
                 .peek(zone -> LOGGER.info("Considering zone " + zone))
+                .filter(zone -> !tasks.isOverloaded(zone) && (zones.isSameZone(zone, clientZone)))
                 .filter(zone -> !tasks.isBusy(zone)
-                        && (zones.isSameZone(zone, clientZone)
                         || zones.isClosestZone(zone, clientZone)
-                        || zones.isNeighbour(zone, clientZone)))
+                        || zones.isNeighbour(zone, clientZone))
                 .findFirst();
-
-        return chosenServer.orElse(tasks.lessTasks());
+        String chosen = chosenByZone.orElse(tasks.lessTasks());
+        tasks.countTaskForZone(chosen);
+        return chosen;
     }
 }
