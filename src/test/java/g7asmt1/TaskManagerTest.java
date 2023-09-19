@@ -1,7 +1,6 @@
 package g7asmt1;
 
 import g7asmt1.server.TaskManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,35 +15,35 @@ public class TaskManagerTest {
 
     @ParameterizedTest
     @CsvSource({"1", "2", "3", "4", "5"})
-    void testIsBusy_notBusy(String zone){
+    void testIsBusy_notBusy(int zone){
         TaskManager tm = new TaskManager(new int[] {0, 1, 5, 6, 7, 0});
         assertFalse(tm.isBusy(zone));
     }
 
     @ParameterizedTest
     @CsvSource({"1", "2", "3", "4", "5"})
-    void testIsBusy_busy(String zone){
+    void testIsBusy_busy(int zone){
         TaskManager tm = new TaskManager(new int[] {0, 8, 9, 17, 18, 16});
         assert(tm.isBusy(zone));
     }
 
     @ParameterizedTest
     @CsvSource({"1", "2", "3", "4", "5"})
-    void testIsOverloaded_notOverloaded(String zone){
+    void testIsOverloaded_notOverloaded(int zone){
         TaskManager tm = new TaskManager(new int[] {0, 7, 8, 9, 17, 1});
         assertFalse(tm.isOverloaded(zone));
     }
 
     @ParameterizedTest
     @CsvSource({"1", "2", "3", "4", "5"})
-    void testIsOverloaded_overloaded(String zone){
+    void testIsOverloaded_overloaded(int zone){
         TaskManager tm = new TaskManager(new int[] {0, 18, 19, 20, 100, 1000});
         assert(tm.isOverloaded(zone));
     }
 
     @ParameterizedTest
     @MethodSource("testCases_lessTasks")
-    public void testLessTasks(int[] counter, String expected) throws RemoteException {
+    public void testLessTasks(int[] counter, int expected) throws RemoteException {
         TaskManager tm = new TaskManager(counter);
         assertEquals(expected, tm.lessTasks());
     }

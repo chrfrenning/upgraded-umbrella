@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class ZoneManagerTest {
     private ZoneManager zm;
 
@@ -14,20 +16,14 @@ public class ZoneManagerTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"1, 1", "2, 2", "3, 3", "4, 4", "5, 5"})
-    void testIsSameZone(String zone, int clientZone){
-        assert (zm.isSameZone(zone, clientZone));
+    @CsvSource({"1, 2", "2, 3", "3, 4", "4, 5", "5, 1"})
+    void testClosestZone(int clientZone, int closestZone){
+        assertEquals(closestZone, zm.closestZone(clientZone));
     }
 
     @ParameterizedTest
-    @CsvSource({"2, 1", "3, 2", "4, 3", "5, 4", "1, 5", "2, 6", "1, 0"})
-    void testIsClosestZone(String zone, int clientZone) {
-        assert(zm.isClosestZone(zone, clientZone));
-    }
-
-    @ParameterizedTest
-    @CsvSource({"3, 1", "4, 2", "5, 3", "1, 4", "2, 5"})
-    void testIsNeighbour(String zone, int clientZone) {
-        assert(zm.isNeighbour(zone, clientZone));
+    @CsvSource({"1, 3", "2, 4", "3, 5", "4, 1", "5, 2"})
+    void testNeighbourZone(int clientZone, int neighbourZone){
+        assertEquals(neighbourZone, zm.neighbourZone(clientZone));
     }
 }
