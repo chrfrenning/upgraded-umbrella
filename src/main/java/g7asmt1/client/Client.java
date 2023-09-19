@@ -8,15 +8,27 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
-import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Client {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
     private static final int PORT = 1099;
-
+    private static MethodStats getPopulationOfCountryStats = new MethodStats();
+    private static MethodStats getNumberOfCitiesStats = new MethodStats();
+    private static MethodStats getNumberOfCountries2Stats = new MethodStats();
+    private static MethodStats getNumberOfCountries3Stats = new MethodStats();
+    
     public static void main(String[] args) {
         try {
+            // Disable logging for clean output, enable with --log
+            LOGGER.setLevel(Level.OFF);
+            for (String arg : args) {
+                if (arg.equals("--log")) {
+                    LOGGER.setLevel(Level.ALL);
+                }
+            }
+
             // Let's have a cache
             Cache cache = new Cache();
 
@@ -55,8 +67,11 @@ public class Client {
                                 break;
                             }
                             String country = String.join(" ", sliceArgs(lineArray, 1, lineArray.length-1));
+                            TurnaroundTimer timer = new TurnaroundTimer();
                             res = getService(loadBalancer, zone).getPopulationOfCountry(country, zone);
                             LOGGER.info(res.toString());
+                            printResult(lineArray, res, timer.clock());
+                            getPopulationOfCountryStats.add(timer.clock(), res.executionTime, res.waitingTime);
 
                             cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length-1), res);
                             break;
@@ -73,9 +88,12 @@ public class Client {
                             }
 
                             String country = String.join(" ", sliceArgs(lineArray, 1, lineArray.length - numArgs));
+                            TurnaroundTimer timer = new TurnaroundTimer();
                             int minPopulation = Integer.parseInt(lineArray[lineArray.length - numArgs]);
                             res = getService(loadBalancer, zone).getNumberOfCities(country, minPopulation, zone);
                             LOGGER.info(res.toString());
+                            printResult(lineArray, res, timer.clock());
+                            getNumberOfCitiesStats.add(timer.clock(), res.executionTime, res.waitingTime);
 
                             cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs), res);
                             break;
@@ -96,8 +114,11 @@ public class Client {
                                 int minCities = Integer.parseInt(lineArray[1]);
                                 int minPopulation = Integer.parseInt(lineArray[2]);
                                 int maxPopulation = Integer.parseInt(lineArray[3]);
+                                TurnaroundTimer timer = new TurnaroundTimer();
                                 res = getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, maxPopulation, zone);
                                 LOGGER.info(res.toString());
+                                printResult(lineArray, res, timer.clock());
+                                getNumberOfCountries3Stats.add(timer.clock(), res.executionTime, res.waitingTime);
 
                                 cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs), res);
                                 break;
@@ -114,8 +135,11 @@ public class Client {
 
                                 int minCities = Integer.parseInt(lineArray[1]);
                                 int minPopulation = Integer.parseInt(lineArray[2]);
+                                TurnaroundTimer timer = new TurnaroundTimer();
                                 res = getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, zone);
                                 LOGGER.info(res.toString());
+                                printResult(lineArray, res, timer.clock());
+                                getNumberOfCountries2Stats.add(timer.clock(), res.executionTime, res.waitingTime);
 
                                 cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs), res);
                                 break;
@@ -131,6 +155,54 @@ public class Client {
             LOGGER.severe("Something went wrong on the client side while querying a service.");
             e.printStackTrace();
         }
+
+        // Print statistics
+        System.out.println(String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d",
+            "getPopulationOfCountry",
+            getPopulationOfCountryStats.avgTurnaround(),
+            getPopulationOfCountryStats.avgExecution(),
+            getPopulationOfCountryStats.avgWait(),
+            getPopulationOfCountryStats.size()
+            ));
+
+        System.out.println(String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d",
+            "getNumberOfCities",
+            getNumberOfCitiesStats.avgTurnaround(),
+            getNumberOfCitiesStats.avgExecution(),
+            getNumberOfCitiesStats.avgWait(),
+            getNumberOfCitiesStats.size()
+            ));
+
+        System.out.println(String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d",
+            "getNumberOfCountries(minmax)",
+            getNumberOfCountries2Stats.avgTurnaround(),
+            getNumberOfCountries2Stats.avgExecution(),
+            getNumberOfCountries2Stats.avgWait(),
+            getNumberOfCountries2Stats.size()
+            ));
+
+        System.out.println(String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d",
+            "getNumberOfCountries(min)",
+            getNumberOfCountries3Stats.avgTurnaround(),
+            getNumberOfCountries3Stats.avgExecution(),
+            getNumberOfCountries3Stats.avgWait(),
+            getNumberOfCountries3Stats.size()
+            ));
+    }
+
+    private static void printResult(String[] args, Result res, long turnAroundTime) {
+        String command = String.join(" ", sliceArgs(args, 0, args.length - 1));
+
+        String rstr = String.format("%d %s (turnaround time: %d ms, execution time: %d ms, waiting time: %d ms, processed by server #%d)", 
+            res.result,
+            command,
+            turnAroundTime, // turnaround time
+            res.executionTime,
+            res.waitingTime,
+            res.zone
+            );
+
+        System.out.println( rstr );
     }
 
     private static String[] sliceArgs(String[] args, int start, int end) {
