@@ -50,8 +50,7 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
 
     public boolean isNeighbour(String zone, int clientZone) {
         LOGGER.info("Zone " + zone + " is neighbour to client zone " + clientZone);
-        int neighbour = (clientZone + 2) % amountOfServers;
-        return zone.equals(String.valueOf(neighbour == 0 ? amountOfServers : neighbour));
+        return zone.equals(String.valueOf((clientZone + 1) % amountOfServers + 1));
     }
 
     public boolean isBusy(String zone) {
