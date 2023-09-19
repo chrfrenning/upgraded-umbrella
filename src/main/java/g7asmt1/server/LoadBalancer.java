@@ -16,10 +16,12 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
      * should  be able to handle new servers added or removed without disturbance of the
      * unchanged servers' progress.
     */
-    private final ZoneManager zoneMngr;
+    private final ZoneManager zones;
+    private final TaskManager tasks;
 
     public LoadBalancer(int amountOfServers) throws RemoteException {
-        this.zoneMngr = new ZoneManager(amountOfServers);
+        this.zones = new ZoneManager(amountOfServers);
+        this.tasks = new TaskManager(amountOfServers);
     }
 
     @Override
@@ -31,10 +33,10 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
         // Iterate through the list of services and find the one with the least load
         return Arrays.stream(LocateRegistry.getRegistry("localhost", PORT).list())
                 .peek(zone -> LOGGER.info("Considering zone " + zone))
-                .filter(zone -> !zoneMngr.isBusy(zone)
-                        && (zoneMngr.isSameZone(zone, clientZone)
-                        || zoneMngr.isClosestZone(zone, clientZone)
-                        || zoneMngr.isNeighbour(zone, clientZone)))
+                .filter(zone -> !tasks.isBusy(zone)
+                        && (zones.isSameZone(zone, clientZone)
+                        || zones.isClosestZone(zone, clientZone)
+                        || zones.isNeighbour(zone, clientZone)))
                 .findFirst()
                 .orElseThrow(() -> new RemoteException("No server available at the moment for zone " + clientZone));
     }
