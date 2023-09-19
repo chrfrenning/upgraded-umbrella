@@ -7,11 +7,11 @@ public class ZoneManager {
         this.amountOfServers = amountOfServers;
     }
 
-    public int closestZone(int clientZone) {
+    public int closest(int clientZone) {
         return clientZone % amountOfServers + 1;
     }
 
-    public int neighbourZone(int clientZone) {
+    public int neighbour(int clientZone) {
         return (clientZone + 1) % amountOfServers + 1;
     }
 }

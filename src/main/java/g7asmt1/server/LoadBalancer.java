@@ -10,27 +10,16 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
      * should  be able to handle new servers added or removed without disturbance of the
      * unchanged servers' progress.
     */
-    private final ZoneManager zones;
     private final TaskManager tasks;
 
     public LoadBalancer(int amountOfServers) throws RemoteException {
-        this.zones = new ZoneManager(amountOfServers);
         this.tasks = new TaskManager(amountOfServers);
     }
 
     @Override
     public String chooseServer(int clientZone) throws RemoteException {
-        int chosen = chooseFromList(clientZone, tasks);
+        int chosen = tasks.chooseForZone(clientZone);
         tasks.incrementCounterForZone(chosen);
         return String.valueOf(chosen);
-    }
-
-    public int chooseFromList(int clientZone,
-                              TaskManager tasks) throws RemoteException {
-
-          return !tasks.isOverloaded(clientZone) ? clientZone
-                  : !tasks.isBusy(zones.closestZone(clientZone)) ? zones.closestZone(clientZone)
-                  : !tasks.isBusy(zones.neighbourZone(clientZone)) ? zones.neighbourZone(clientZone)
-                  : tasks.lessTasks();
     }
 }
