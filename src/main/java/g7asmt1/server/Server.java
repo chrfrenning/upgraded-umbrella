@@ -35,7 +35,8 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
         this.queueLength = 0;
         this.threadPool = Executors.newSingleThreadExecutor();
     }
-
+    public static CacheServer cache = new CacheServer();
+    
     /*
      * Our request methods, these are invoked by RMI, we then queue the request
      * for processing in a single thread threadpool, which we know java uses a fifo
@@ -57,6 +58,14 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                     sleepMs(clientZone == zone ? 80 : 170);
 
                     // Query the dataset
+                    if(cache.enabled && cache.get("getPopulationOfCountry", countryName) != null)
+                    {
+                        LOGGER.info("result printed from cache "+countryName);
+                        return cache.get("getPopulationOfCountry", countryName);
+                       
+                    }
+                    else
+                    {
                     long population = 0;
                     try {
                         List<GeoBean> beans = LoadDataFile();
@@ -69,7 +78,13 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                     }
 
                     Date executionTimeEnd = new Date();
-                    return new Result("getPopulation", population, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                    Result resultToReturn = new Result("getPopulation", population, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                    cache.add("getPopulationOfCountry",countryName, resultToReturn);
+                    LOGGER.info("result printed from DB query "+countryName);
+                    return resultToReturn;
+                    
+                    }
+                    
                 } finally {
                     decrementQueueLength();
                 }
@@ -97,7 +112,14 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
 
                     sleepMs(clientZone == zone ? 80 : 170);
 
-                    // Query the dataset
+                    if(cache.enabled && cache.get("getNumberOfCities", countryName) != null)
+                    {
+                        LOGGER.info("result printed from cache "+countryName);
+                        return cache.get("getNumberOfCities", countryName);
+                       
+                    }else{
+                    
+                        // Query the dataset
                     long cities = 0;
                     try {
                         List<GeoBean> beans = LoadDataFile();
@@ -111,7 +133,16 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                     }
 
                     Date executionTimeEnd = new Date();
-                    return new Result("getNumberOfCities", cities, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                    
+                    Result resultToReturn = new Result("getNumberOfCities", cities, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                    cache.add("getNumberOfCities",countryName, resultToReturn);
+                    LOGGER.info("result printed from DB query "+countryName);
+                    
+                    return resultToReturn;
+                        
+                    }
+                    
+                    
                 } finally {
                     decrementQueueLength();
                 }
@@ -134,7 +165,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     public Result getNumberOfCountries(int cityCount, int minPopulation, int maxPopulation, int clientZone) throws RemoteException {
         final Date waitingTimeStart = new Date();
         incrementQueueLength();
-        
+        String keyMadeWithMinMaxPopulation = Integer.toString(minPopulation)+Integer.toString(maxPopulation);
         Future<Result> futureResult = threadPool.submit(new Callable<Result>() {
             @Override
             public Result call() throws Exception {
@@ -143,7 +174,11 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                     Date executionTimeStart = new Date();
 
                     sleepMs(clientZone == zone ? 80 : 170);
-
+                    if(cache.enabled && cache.get("getNumberOfCountries", keyMadeWithMinMaxPopulation) != null){
+                        LOGGER.info("result printed from cache for getNumberOfCountries");
+                        return cache.get("getNumberOfCountries", keyMadeWithMinMaxPopulation);
+                    }else{
+                        
                     // Query the dataset
                     long countries = 0;
                     try {
@@ -159,7 +194,12 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                     }
 
                     Date executionTimeEnd = new Date();
-                    return new Result("getNumberOfCountries", countries, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                    
+                    Result resultToReturn = new Result("getNumberOfCountries", countries, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                    cache.add("getNumberOfCountries",keyMadeWithMinMaxPopulation, resultToReturn);
+                    LOGGER.info("result printed from DB query for getNumberOfCountries");
+                    return resultToReturn;
+                    }
                 } finally {
                     decrementQueueLength();
                 }
@@ -236,6 +276,18 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     */
     public static void main(String[] args) {
         try {
+            
+            // Let's have a cache
+          
+
+            // Check argument list for --cache and enable the cache, else disable it
+            cache.disable();
+            for (String arg : args) {
+                if (arg.equals("--cache")) {
+                    cache.enable();
+                }
+            }
+            
             if (args.length != 1) {
                 System.out.println("Usage: java server.Server <zone number>");
                 System.exit(0);
