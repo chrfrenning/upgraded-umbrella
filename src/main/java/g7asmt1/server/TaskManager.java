@@ -46,7 +46,8 @@ public class TaskManager {
 
     public void incrementCounterForZone(int zone) {
         // TODO: No limits?
-        waitingLists[zone]++;
+        // TODO: remove test data
+        waitingLists[zone] = waitingLists[zone] >= 19 ? 0 : waitingLists[zone]++;
     }
 
     public void syncWaitingList(int zone, int queueLength) {
