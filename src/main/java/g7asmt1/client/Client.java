@@ -157,37 +157,37 @@ public class Client {
         }
 
         // Print statistics
-        System.out.println(String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d",
+        System.out.printf("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
             "getPopulationOfCountry",
             getPopulationOfCountryStats.avgTurnaround(),
             getPopulationOfCountryStats.avgExecution(),
             getPopulationOfCountryStats.avgWait(),
             getPopulationOfCountryStats.size()
-            ));
+            );
 
-        System.out.println(String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d",
+        System.out.printf("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
             "getNumberOfCities",
             getNumberOfCitiesStats.avgTurnaround(),
             getNumberOfCitiesStats.avgExecution(),
             getNumberOfCitiesStats.avgWait(),
             getNumberOfCitiesStats.size()
-            ));
+            );
 
-        System.out.println(String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d",
+        System.out.printf("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
             "getNumberOfCountries(minmax)",
             getNumberOfCountries2Stats.avgTurnaround(),
             getNumberOfCountries2Stats.avgExecution(),
             getNumberOfCountries2Stats.avgWait(),
             getNumberOfCountries2Stats.size()
-            ));
+            );
 
-        System.out.println(String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d",
+        System.out.printf("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
             "getNumberOfCountries(min)",
             getNumberOfCountries3Stats.avgTurnaround(),
             getNumberOfCountries3Stats.avgExecution(),
             getNumberOfCountries3Stats.avgWait(),
             getNumberOfCountries3Stats.size()
-            ));
+            );
     }
 
     private static void printResult(String[] args, Result res, long turnAroundTime) {
