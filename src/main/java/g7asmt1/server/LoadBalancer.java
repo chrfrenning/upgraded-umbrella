@@ -11,9 +11,11 @@ public class LoadBalancer extends UnicastRemoteObject implements Proxy {
      * unchanged servers' progress.
     */
     private final TaskManager tasks;
+    private final WaitingList counter;
 
     public LoadBalancer(int amountOfServers) throws RemoteException {
-        this.tasks = new TaskManager(amountOfServers);
+        counter = new WaitingList(new int[amountOfServers + 1]); // add 1 to simplify conversion from zone to indexes
+        this.tasks = new TaskManager(amountOfServers, counter);
     }
 
     @Override

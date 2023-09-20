@@ -34,7 +34,6 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
         this.zone = zone;
         this.queueLength = 0;
         this.threadPool = Executors.newSingleThreadExecutor();
-        LOGGER.info(String.format("server.Server in zone %d is created.%n", zone));
     }
 
     /*
@@ -208,6 +207,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -225,9 +225,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
             .withType(GeoBean.class)
             .withSeparator(';')
             .build();
-        
-        List<GeoBean> beans = csvToBean.parse();
-        return beans;
+        return csvToBean.parse();
     }
     
 
@@ -245,7 +243,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
             int zone = Integer.parseInt(args[0]);
             // Get the registry on the PORT and bind a server instance to the registry
             LocateRegistry.getRegistry(PORT).bind(String.valueOf(zone), new Server(zone));
-            LOGGER.info(String.format("server.Server in zone %d is registered.%n", zone));
+            LOGGER.info(String.format("Server in zone %d is registered.%n", zone));
         } catch (Exception e) {
             LOGGER.severe("Failed to create or register a server to the registry.");
             e.printStackTrace();

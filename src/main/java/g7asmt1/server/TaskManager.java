@@ -1,57 +1,42 @@
 package g7asmt1.server;
 
 public class TaskManager {
-    private int[] waitingLists; // waiting lists
-    private static final int BUSY = 8;
-    private static final int OVERLOAD = 18;
+    private final WaitingList counter; // waiting lists
     private static ZoneManager zones;
-    public TaskManager(int amountOfServers) {
-        this.waitingLists = new int[amountOfServers + 1]; // For simplicity the index 0 will not be used
+    public TaskManager(int amountOfServers, WaitingList counter) {
+        this.counter = counter; // For simplicity the index 0 will not be used
         zones = new ZoneManager(amountOfServers);
     }
 
     @Deprecated(since = "For test purposes only!")
     public TaskManager(int[] waitingLists) {
-        this.waitingLists = waitingLists;
+        this.counter = new WaitingList(waitingLists);
         zones = new ZoneManager(waitingLists.length - 1);
-    }
-    public boolean isBusy(int zone) {
-        // TODO handle negatives
-        return waitingLists[zone] >= BUSY;
-    }
-
-    public boolean isOverloaded(int zone) {
-        // TODO handle negatives
-        return waitingLists[zone] >= OVERLOAD;
     }
 
     public int chooseForZone(int zone) {
         int closest = zones.closest(zone);
         int neighbour = zones.neighbour(zone);
-        return !isOverloaded(zone)
-                || (isOverloaded(closest) && isOverloaded(neighbour))
+        return !counter.isOverloaded(zone)
+                || (counter.isOverloaded(closest) && counter.isOverloaded(neighbour))
                 ? zone
-                : !isBusy(closest)
+                : !counter.isBusy(closest)
                 ? closest
-                : !isBusy(neighbour)
+                : !counter.isBusy(neighbour)
                 ? neighbour
-                : !isOverloaded(closest) && waitingLists[closest] < waitingLists[neighbour]
+                : !counter.isOverloaded(closest) && counter.get(closest) < counter.get(neighbour)
                 ? closest
-                : !isOverloaded(neighbour) && waitingLists[closest] > waitingLists[neighbour]
+                : !counter.isOverloaded(neighbour) && counter.get(closest) > counter.get(neighbour)
                 ? neighbour
-                : waitingLists[closest] == waitingLists[neighbour] && Math.random() < 0.5
+                : counter.get(closest) == counter.get(neighbour) && Math.random() < 0.5
                 ? closest// random
                 : neighbour;
     }
 
     public void incrementCounterForZone(int zone) {
-        // TODO: No limits?
-        // TODO: remove test data
-        waitingLists[zone] = waitingLists[zone] >= 19 ? 0 : waitingLists[zone]++;
-    }
-
-    public void syncWaitingList(int zone, int queueLength) {
-        // TODO: No limits?
-        waitingLists[zone] = queueLength;
+        counter.incrementForZone(zone);
+        if (counter.get(zone) >= 18) {
+            new WaitingListSynchronizer(counter, zone).start();
+        }
     }
 }

@@ -23,7 +23,7 @@ public class NetworkSimulator {
             // Bind remote objects to the registry
             for (int zone = 1; zone <= AMOUNT_OF_ZONES; zone++) {
                 registry.bind(String.valueOf(zone), new Server(zone));
-                LOGGER.info(String.format("server.Server in zone %d is registered.%n", zone));
+                LOGGER.info(String.format("Server in zone %d is registered.%n", zone));
             }
         } catch (Exception e) {
             LOGGER.severe("Cannot register load balancer or servers.");
