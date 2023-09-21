@@ -50,7 +50,11 @@ public class Cache {
         this.enabled = true;
     }
 
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
     private Result copyResultWithCacheHitFlagSet(Result result) {
-        return new Result(result.serviceName, result.result, result.waitingTime, result.executionTime, result.zone, result.serverCacheHit, true);
+        return new Result(result.serviceName, result.result, result.waitingTime, result.executionTime, result.zone, result.serverCacheEnabled, result.serverCacheHit, true);
     }
 }

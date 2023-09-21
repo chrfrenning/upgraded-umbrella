@@ -6,6 +6,8 @@ import g7asmt1.server.StatisticsService;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.util.logging.Level;
@@ -64,13 +66,15 @@ public class Client {
                             Result res = cache.get(lineArray[0], sliceArgs(lineArray, 1, lineArray.length-1));
                             if (res != null) {
                                 LOGGER.info(res.toString());
+                                res.waitingTime = res.executionTime = 0;
+                                printResult(args, res, zone, cache.isEnabled());
                                 break;
                             }
                             String country = String.join(" ", sliceArgs(lineArray, 1, lineArray.length-1));
                             TurnaroundTimer timer = new TurnaroundTimer();
                             res = getService(loadBalancer, zone).getPopulationOfCountry(country, zone);
                             LOGGER.info(res.toString());
-                            printResult(lineArray, res, timer.clock());
+                            printResult(lineArray, res, timer.clock(), cache.isEnabled());
                             getPopulationOfCountryStats.add(timer.clock(), res.executionTime, res.waitingTime);
 
                             cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length-1), res);
@@ -84,6 +88,8 @@ public class Client {
                             Result res = cache.get(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs));
                             if (res != null) {
                                 LOGGER.info(res.toString());
+                                res.waitingTime = res.executionTime = 0;
+                                printResult(args, res, zone, cache.isEnabled());
                                 break;
                             }
 
@@ -92,7 +98,7 @@ public class Client {
                             int minPopulation = Integer.parseInt(lineArray[lineArray.length - numArgs]);
                             res = getService(loadBalancer, zone).getNumberOfCities(country, minPopulation, zone);
                             LOGGER.info(res.toString());
-                            printResult(lineArray, res, timer.clock());
+                            printResult(lineArray, res, timer.clock(), cache.isEnabled());
                             getNumberOfCitiesStats.add(timer.clock(), res.executionTime, res.waitingTime);
 
                             cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs), res);
@@ -108,6 +114,8 @@ public class Client {
                                 Result res = cache.get(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs));
                                 if (res != null) {
                                     LOGGER.info(res.toString());
+                                    res.waitingTime = res.executionTime = 0;
+                                    printResult(args, res, zone, cache.isEnabled());
                                     break;
                                 }
 
@@ -117,7 +125,7 @@ public class Client {
                                 TurnaroundTimer timer = new TurnaroundTimer();
                                 res = getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, maxPopulation, zone);
                                 LOGGER.info(res.toString());
-                                printResult(lineArray, res, timer.clock());
+                                printResult(lineArray, res, timer.clock(), cache.isEnabled());
                                 getNumberOfCountries3Stats.add(timer.clock(), res.executionTime, res.waitingTime);
 
                                 cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs), res);
@@ -130,6 +138,8 @@ public class Client {
                                 Result res = cache.get(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs));
                                 if (res != null) {
                                     LOGGER.info(res.toString());
+                                    res.waitingTime = res.executionTime = 0;
+                                    printResult(args, res, zone, cache.isEnabled());
                                     break;
                                 }
 
@@ -138,7 +148,7 @@ public class Client {
                                 TurnaroundTimer timer = new TurnaroundTimer();
                                 res = getService(loadBalancer, zone).getNumberOfCountries(minCities, minPopulation, zone);
                                 LOGGER.info(res.toString());
-                                printResult(lineArray, res, timer.clock());
+                                printResult(lineArray, res, timer.clock(), cache.isEnabled());
                                 getNumberOfCountries2Stats.add(timer.clock(), res.executionTime, res.waitingTime);
 
                                 cache.add(lineArray[0], sliceArgs(lineArray, 1, lineArray.length - numArgs), res);
@@ -190,7 +200,7 @@ public class Client {
             );
     }
 
-    private static void printResult(String[] args, Result res, long turnAroundTime) {
+    private static void printResult(String[] args, Result res, long turnAroundTime, boolean clientCacheEnabled) {
         String command = String.join(" ", sliceArgs(args, 0, args.length - 1));
 
         String rstr = String.format("%d %s (turnaround time: %d ms, execution time: %d ms, waiting time: %d ms, processed by server #%d)", 
@@ -203,6 +213,23 @@ public class Client {
             );
 
         System.out.println( rstr );
+
+        // Write this to a log file as well
+
+        String filename = "naive_server.txt";
+        if ( res.serverCacheEnabled ) {
+            filename = "server_cache.txt";
+        } else if ( clientCacheEnabled ) {
+            filename = "client_cache.txt";
+        }
+
+        try {
+            FileWriter fw = new FileWriter(filename, true);
+            fw.write(rstr + "\n");
+            fw.close();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error writing to file", e);
+        }
     }
 
     private static String[] sliceArgs(String[] args, int start, int end) {

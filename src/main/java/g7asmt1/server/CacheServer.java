@@ -1,27 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package g7asmt1.server;
-
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author turzo
- */
-
-
 public class CacheServer {
-    
-      final int MAX_SIZE = 150;
+    final int MAX_SIZE = 150;
     private List<CacheItemServer> cache;
     boolean enabled = true;
 
-    public CacheServer() {
+    public CacheServer(boolean enable) {
         this.cache = new ArrayList<CacheItemServer>();
+        this.enabled = enable;
     }
 
     synchronized public void add(String method, String args, Result result) {
@@ -61,7 +50,8 @@ public class CacheServer {
     }
 
     private Result copyResultWithCacheHitFlagSet(Result result) {
-        return new Result(result.serviceName, result.result, result.waitingTime, result.executionTime, result.zone, result.serverCacheHit, true);
+        // true, true, false = serverCacheEnabled, serverCacheHit, obviously not a client cache hit on this side of the fence
+        return new Result(result.serviceName, result.result, result.waitingTime, result.executionTime, result.zone, true, true, false);
     }
     
 }

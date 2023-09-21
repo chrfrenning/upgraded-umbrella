@@ -15,6 +15,14 @@ public class NetworkSimulator {
      */
     public static void main(String[] args) {
         try {
+            // Check argument list for --cache and enable the cache, else disable it
+            boolean enableCache = false;
+            for (String arg : args) {
+                if (arg.equals("--cache")) {
+                    enableCache = true;
+                }
+            }
+
             // Create a registry
             Registry registry = LocateRegistry.createRegistry(PORT);
             // Bind the load balancer to the registry
@@ -22,7 +30,7 @@ public class NetworkSimulator {
             LOGGER.info(String.format("loadBalancer is running on port %d.", PORT));
             // Bind remote objects to the registry
             for (int zone = 1; zone <= AMOUNT_OF_ZONES; zone++) {
-                registry.bind(String.valueOf(zone), new Server(zone));
+                registry.bind(String.valueOf(zone), new Server(zone, enableCache));
                 LOGGER.info(String.format("Server in zone %d is registered.%n", zone));
             }
         } catch (Exception e) {

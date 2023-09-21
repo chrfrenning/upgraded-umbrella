@@ -10,6 +10,7 @@ public class Result implements Serializable {
     public int zone;
     public boolean serverCacheHit;
     public boolean clientCacheHit;
+    public boolean serverCacheEnabled;
 
     public Result(String serviceName, long result, long waitingTime, long executionTime, int zone) {
         this.serviceName = serviceName;
@@ -19,9 +20,10 @@ public class Result implements Serializable {
         this.zone = zone;
         this.serverCacheHit = false;
         this.clientCacheHit = false;
+        this.serverCacheEnabled = false;
     }
 
-    public Result(String serviceName, long result, long waitingTime, long executionTime, int zone, boolean serverCacheHit, boolean clientCacheHit) {
+    public Result(String serviceName, long result, long waitingTime, long executionTime, int zone, boolean serverCacheEnabled, boolean serverCacheHit, boolean clientCacheHit) {
         this.serviceName = serviceName;
         this.result = result;
         this.waitingTime = waitingTime;
@@ -29,6 +31,7 @@ public class Result implements Serializable {
         this.zone = zone;
         this.serverCacheHit = serverCacheHit;
         this.clientCacheHit = clientCacheHit;
+        this.serverCacheEnabled = serverCacheEnabled;
     }
 
     @Override

@@ -29,13 +29,14 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     private final int zone;
     private final ExecutorService threadPool;
     private int queueLength;
+    private CacheServer cache;
     
-    protected Server(int zone) throws RemoteException {
+    protected Server(int zone, boolean enableCache) throws RemoteException {
         this.zone = zone;
         this.queueLength = 0;
         this.threadPool = Executors.newSingleThreadExecutor();
+        this.cache = new CacheServer(enableCache);
     }
-    public static CacheServer cache = new CacheServer();
     
     /*
      * Our request methods, these are invoked by RMI, we then queue the request
@@ -52,21 +53,28 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
             @Override
             public Result call() throws Exception {
                 try {
+
                     Date waitingTimeEnd = new Date();
                     Date executionTimeStart = new Date();
 
                     sleepMs(clientZone == zone ? 80 : 170);
 
-                    // Query the dataset
-                    if(cache.enabled && cache.get("getPopulationOfCountry", countryName) != null)
+                    if ( cache.enabled )
                     {
-                        LOGGER.info("result printed from cache "+countryName);
-                        return cache.get("getPopulationOfCountry", countryName);
-                       
+                        // Check the cache
+                        Result cacheResult = cache.get("getPopulationOfCountry", countryName);
+                        if ( cacheResult != null ) {
+                            cacheResult.waitingTime = waitingTimeEnd.getTime() - waitingTimeStart.getTime();
+                            cacheResult.executionTime = (new Date()).getTime() - executionTimeStart.getTime();
+                            
+                            LOGGER.info("result printed from cache " + countryName);
+                            return cacheResult;
+                        }
                     }
-                    else
-                    {
+                    
+                    // Query the dataset
                     long population = 0;
+
                     try {
                         List<GeoBean> beans = LoadDataFile();
                         population = beans.stream()
@@ -79,11 +87,10 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
 
                     Date executionTimeEnd = new Date();
                     Result resultToReturn = new Result("getPopulation", population, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                    resultToReturn.serverCacheEnabled = cache.enabled;
                     cache.add("getPopulationOfCountry",countryName, resultToReturn);
                     LOGGER.info("result printed from DB query "+countryName);
                     return resultToReturn;
-                    
-                    }
                     
                 } finally {
                     decrementQueueLength();
@@ -112,14 +119,21 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
 
                     sleepMs(clientZone == zone ? 80 : 170);
 
-                    if(cache.enabled && cache.get("getNumberOfCities", countryName) != null)
+                    if ( cache.enabled )
                     {
-                        LOGGER.info("result printed from cache "+countryName);
-                        return cache.get("getNumberOfCities", countryName);
+                        // Check the cache
+                        Result cacheResult = cache.get("getNumberOfCities", countryName);
+                        if ( cacheResult != null ) {
+                            cacheResult.waitingTime = waitingTimeEnd.getTime() - waitingTimeStart.getTime();
+                            cacheResult.executionTime = (new Date()).getTime() - executionTimeStart.getTime();
+
+                            LOGGER.info("result printed from cache "+countryName);
+                            return cacheResult;
+                        }
                        
-                    }else{
+                    } 
                     
-                        // Query the dataset
+                    // Query the dataset
                     long cities = 0;
                     try {
                         List<GeoBean> beans = LoadDataFile();
@@ -135,13 +149,11 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                     Date executionTimeEnd = new Date();
                     
                     Result resultToReturn = new Result("getNumberOfCities", cities, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                    resultToReturn.serverCacheEnabled = cache.enabled;
                     cache.add("getNumberOfCities",countryName, resultToReturn);
                     LOGGER.info("result printed from DB query "+countryName);
                     
                     return resultToReturn;
-                        
-                    }
-                    
                     
                 } finally {
                     decrementQueueLength();
@@ -174,11 +186,19 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                     Date executionTimeStart = new Date();
 
                     sleepMs(clientZone == zone ? 80 : 170);
-                    if(cache.enabled && cache.get("getNumberOfCountries", keyMadeWithMinMaxPopulation) != null){
-                        LOGGER.info("result printed from cache for getNumberOfCountries");
-                        return cache.get("getNumberOfCountries", keyMadeWithMinMaxPopulation);
-                    }else{
-                        
+
+                    if ( cache.enabled ) {
+                        // Check the cache
+                        Result cacheResult = cache.get("getNumberOfCountries", keyMadeWithMinMaxPopulation);
+                        if ( cacheResult != null ) {
+                            cacheResult.waitingTime = waitingTimeEnd.getTime() - waitingTimeStart.getTime();
+                            cacheResult.executionTime = (new Date()).getTime() - executionTimeStart.getTime();
+
+                            LOGGER.info("result printed from cache for getNumberOfCountries");
+                            return cacheResult;
+                        }
+                    }
+
                     // Query the dataset
                     long countries = 0;
                     try {
@@ -196,10 +216,11 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
                     Date executionTimeEnd = new Date();
                     
                     Result resultToReturn = new Result("getNumberOfCountries", countries, waitingTimeEnd.getTime() - waitingTimeStart.getTime(), executionTimeEnd.getTime() - executionTimeStart.getTime(), zone);
+                    resultToReturn.serverCacheEnabled = cache.enabled;
                     cache.add("getNumberOfCountries",keyMadeWithMinMaxPopulation, resultToReturn);
                     LOGGER.info("result printed from DB query for getNumberOfCountries");
                     return resultToReturn;
-                    }
+
                 } finally {
                     decrementQueueLength();
                 }
@@ -277,14 +298,11 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
     public static void main(String[] args) {
         try {
             
-            // Let's have a cache
-          
-
             // Check argument list for --cache and enable the cache, else disable it
-            cache.disable();
+            boolean enableCache = false;
             for (String arg : args) {
                 if (arg.equals("--cache")) {
-                    cache.enable();
+                    enableCache = true;
                 }
             }
             
@@ -294,7 +312,7 @@ public class Server extends UnicastRemoteObject implements StatisticsService {
             }
             int zone = Integer.parseInt(args[0]);
             // Get the registry on the PORT and bind a server instance to the registry
-            LocateRegistry.getRegistry(PORT).bind(String.valueOf(zone), new Server(zone));
+            LocateRegistry.getRegistry(PORT).bind(String.valueOf(zone), new Server(zone, enableCache));
             LOGGER.info(String.format("Server in zone %d is registered.%n", zone));
         } catch (Exception e) {
             LOGGER.severe("Failed to create or register a server to the registry.");
