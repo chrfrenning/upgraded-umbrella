@@ -37,6 +37,8 @@ Source code is provided in source.zip and on [https://github.com/chrfrenning/upg
 
 ![Screenshot of the system in action](./run.png) \
 
+![Running 7 clients towards the servers](./7clients.png) \
+
 
 # Project and workload distribution
 
