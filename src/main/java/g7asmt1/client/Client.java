@@ -167,37 +167,47 @@ public class Client {
         }
 
         // Print statistics
-        System.out.printf("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
+        System.out.printf("--- Statistics:%n");
+
+        String statline = String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
             "getPopulationOfCountry",
             getPopulationOfCountryStats.avgTurnaround(),
             getPopulationOfCountryStats.avgExecution(),
             getPopulationOfCountryStats.avgWait(),
             getPopulationOfCountryStats.size()
             );
+        System.out.println(statline);
+        writeToLogFile("statistics.txt", statline);
 
-        System.out.printf("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
+        statline = String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
             "getNumberOfCities",
             getNumberOfCitiesStats.avgTurnaround(),
             getNumberOfCitiesStats.avgExecution(),
             getNumberOfCitiesStats.avgWait(),
             getNumberOfCitiesStats.size()
             );
+        System.out.println(statline);
+        writeToLogFile("statistics.txt", statline);
 
-        System.out.printf("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
+        statline = String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
             "getNumberOfCountries(minmax)",
             getNumberOfCountries2Stats.avgTurnaround(),
             getNumberOfCountries2Stats.avgExecution(),
             getNumberOfCountries2Stats.avgWait(),
             getNumberOfCountries2Stats.size()
             );
+        System.out.println(statline);
+        writeToLogFile("statistics.txt", statline);
 
-        System.out.printf("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
+        statline = String.format("%s turn around time: %.2f ms, execution time: %.2f ms, waiting time: %.2f ms, numcalls: %d%n",
             "getNumberOfCountries(min)",
             getNumberOfCountries3Stats.avgTurnaround(),
             getNumberOfCountries3Stats.avgExecution(),
             getNumberOfCountries3Stats.avgWait(),
             getNumberOfCountries3Stats.size()
             );
+        System.out.println(statline);
+        writeToLogFile("statistics.txt", statline);
     }
 
     private static void printResult(String[] args, Result res, long turnAroundTime, boolean clientCacheEnabled) {
@@ -215,17 +225,23 @@ public class Client {
         System.out.println( rstr );
 
         // Write this to a log file as well
+        writeToLogFile( decideFilename(res, clientCacheEnabled), rstr );
+    }
 
+    private static String decideFilename( Result res, boolean clientCacheEnabled ) {
         String filename = "naive_server.txt";
         if ( res.serverCacheEnabled ) {
             filename = "server_cache.txt";
         } else if ( clientCacheEnabled ) {
             filename = "client_cache.txt";
         }
+        return filename;
+    }
 
+    private static void writeToLogFile(String filename, String str) {
         try {
             FileWriter fw = new FileWriter(filename, true);
-            fw.write(rstr + "\n");
+            fw.write(str + "\n");
             fw.close();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error writing to file", e);
