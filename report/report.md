@@ -23,7 +23,8 @@ The `Servers` use a threadpool (with a single execution thread) that is used to 
 
 # Frameworks and tools
 
-The coding of the assignment is done in Java 17. The project's dependencies and artefact building processes are handled by Maven 4. The unit tests are implemented with JUnit 5. The implementation is focused on the specified "happy scenario", while security, scalability and robustness issues are not addressed in the code (but mentioned as TODO actions). We used GitHub for code version control.
+The coding of the assignment is done in Java 17. The project's dependencies and artefact building processes are handled by Maven 4. The unit tests are implemented with JUnit 5. When brainstormed the solution, we asked ChatGPT to generate some code, which we fully understood and adjusted to the project. We used GitHub for code version control.
+The implementation is focused on the specified "happy scenario", while security, scalability and robustness issues are not addressed in the code (but mentioned as TODO actions). 
 
 
 # Running our implementation
