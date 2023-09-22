@@ -27,7 +27,7 @@ The coding of the assignment is done in Java 17. The project's dependencies and 
 The implementation is focused on the specified "happy scenario", while security, scalability and robustness issues are not addressed in the code (but mentioned as TODO actions). 
 
 
-# Running our implementation
+# Source code
 
 The source code is stored in `source.zip` and on [https://github.com/chrfrenning/upgraded-umbrella](GitHub/upgraded-umbrella)
 
