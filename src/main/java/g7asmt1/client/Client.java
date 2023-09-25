@@ -12,6 +12,10 @@ import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class Client {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
@@ -20,13 +24,23 @@ public class Client {
     private static MethodStats getNumberOfCitiesStats = new MethodStats();
     private static MethodStats getNumberOfCountries2Stats = new MethodStats();
     private static MethodStats getNumberOfCountries3Stats = new MethodStats();
+    private static String cmdLineArgEnableLogging = "--log";
+    private static String cmdLineArgRunCluster = "--cluster";
     
     public static void main(String[] args) {
         try {
+            // Are we a single client or a simulated cluster?
+            for (String arg : args) {
+                if (arg.equals(cmdLineArgRunCluster)) {
+                    runCluster(args);
+                    return;
+                }
+            }
+
             // Disable logging for clean output, enable with --log
             LOGGER.setLevel(Level.OFF);
             for (String arg : args) {
-                if (arg.equals("--log")) {
+                if (arg.equals(cmdLineArgEnableLogging)) {
                     LOGGER.setLevel(Level.ALL);
                 }
             }
@@ -260,5 +274,36 @@ public class Client {
         String serverName = loadBalancer.chooseServer(zone);
         StatisticsService service = (StatisticsService) Naming.lookup(String.format("rmi://localhost:%d/%s", PORT, serverName));
         return service;
+    }
+
+    private static void runCluster(String[] args) {
+        LOGGER.info("--- !!! Starting in Cluster Mode !!! ---");
+
+        final int NUMBER_OF_SIM_CLIENTS = 20;
+        CountDownLatch latch = new CountDownLatch(NUMBER_OF_SIM_CLIENTS);
+
+        for (int i = 1; i <= NUMBER_OF_SIM_CLIENTS; i++) {
+            final int index = i;
+
+            new Thread(() -> {
+                LOGGER.info("Starting process " + index);
+                main(removeArg(args, cmdLineArgRunCluster));
+                LOGGER.info("Process " + index + " completed");
+                latch.countDown();
+            }).start();
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            LOGGER.log(Level.SEVERE, "Interrupted while waiting for processes to complete", e);
+        }
+
+        LOGGER.info("--- !!! Cluster Mode Completed !!! ---");
+    }
+
+    private static String[] removeArg(String[] args, String argToRemove) {
+        List<String> argList = new ArrayList<>(Arrays.asList(args));
+        argList.remove(argToRemove);
+        return argList.toArray(new String[0]);
     }
 }
